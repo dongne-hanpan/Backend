@@ -1,7 +1,11 @@
 package com.sparta.project.model;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
+@NoArgsConstructor
 @Table(name = "users")
 @Entity
 @Getter
@@ -12,10 +16,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String username;
 
-    @Column
+    @Column(nullable = false)
     private String password;
 
     @Column
@@ -30,4 +34,15 @@ public class User {
     @Column
     private String profileImage;
 
+
+    @Enumerated(EnumType.STRING)
+    private Authority authority;
+
+    @Builder
+    public User(String nickname, String username, String password, Authority authority) {
+        this.nickname = nickname;
+        this.username = username;
+        this.password = password;
+        this.authority = authority;
+    }
 }
