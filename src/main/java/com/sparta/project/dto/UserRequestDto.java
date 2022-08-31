@@ -1,7 +1,7 @@
 package com.sparta.project.dto;
 
-import com.sparta.project.model.User;
 import com.sparta.project.model.Authority;
+import com.sparta.project.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -4,7 +4,6 @@ import com.sparta.project.dto.MatchDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.context.annotation.Configuration;
 
 import javax.persistence.*;
 import java.util.List;

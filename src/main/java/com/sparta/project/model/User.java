@@ -1,5 +1,8 @@
 package com.sparta.project.model;
+
+import lombok.Builder;
 import lombok.Getter;
+
 import javax.persistence.*;
 
 @Table(name = "users")
@@ -29,5 +32,16 @@ public class User {
 
     @Column
     private String profileImage;
+
+    @Enumerated(EnumType.STRING)
+    private Authority authority;
+
+    @Builder
+    public User(String username, String password, String nickname, Authority authority) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.authority = authority;
+    }
 
 }

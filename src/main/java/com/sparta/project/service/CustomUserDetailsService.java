@@ -1,11 +1,11 @@
 package com.sparta.project.service;
 
 
+import com.sparta.project.model.User;
 import com.sparta.project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,10 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     // DB 에 User 값이 존재한다면 UserDetails 객체로 만들어서 리턴
-    private UserDetails createUserDetails(com.sparta.project.model.User user) {
+    private UserDetails createUserDetails(User user) {
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(user.getAuthority().toString());
 
-        return new User(
+        return new org.springframework.security.core.userdetails.User(
                 String.valueOf(user.getId()),
                 user.getPassword(),
                 Collections.singleton(grantedAuthority)

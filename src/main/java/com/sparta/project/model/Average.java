@@ -1,6 +1,7 @@
 package com.sparta.project.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 public class Average {
 
@@ -17,7 +19,7 @@ public class Average {
     private Long id;
 
     @Column
-    private String average;
+    private Long average;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
