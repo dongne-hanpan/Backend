@@ -1,6 +1,7 @@
 package com.sparta.project.controller;
 
 import com.sparta.project.dto.MatchDto;
+import com.sparta.project.model.InvitedUser;
 import com.sparta.project.model.Match;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.service.MatchService;
@@ -26,9 +27,10 @@ public class MatchController {
     }
 
     @PostMapping("/write")
-    private void makeMatch(@RequestBody MatchDto matchDto) {
+    private MatchDto makeMatch(@RequestBody MatchDto matchDto) {
         matchDto.setWriter("test");
         matchService.createMatch(matchDto);
+        return matchDto;
     }
 
     @PutMapping("/update/{match_id}")
@@ -37,10 +39,17 @@ public class MatchController {
     }
 
     @DeleteMapping("/delete/{match_id}")
-    private void deleteMatch(@PathVariable Long match_id) {
-        matchRepository.deleteById(match_id);
+    private void deleteMatch_Host(@PathVariable Long match_id) {
+        matchService.deleteMatch_Host(match_id);
     }
 
-    //후기 입력
+    @DeleteMapping("/deleteSub/{match_id}")
+    private void deleteMatch_NotHost(@PathVariable Long match_id) {
+
+    }
+    @PostMapping("/enter")
+    private List<InvitedUser> enterMatch(@RequestBody Long match_id) {
+        return matchService.enterMatch(match_id);
+    }
 
 }

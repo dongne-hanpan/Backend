@@ -15,7 +15,7 @@ public class AverageService {
 
     public void inputMyScore(AverageDto averageDto) {
 
-//        matchService.validate(averageDto.getMatch_id());
+        matchService.validate(averageDto.getMatch_id());
 
         averageRepository.save(Average.builder()
                 .average(averageDto.getAverage())
