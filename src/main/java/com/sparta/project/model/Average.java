@@ -19,7 +19,7 @@ public class Average {
     private Long id;
 
     @Column
-    private Long average;
+    private Long myScore;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

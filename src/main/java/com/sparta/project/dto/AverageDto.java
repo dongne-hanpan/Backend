@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class AverageDto {
 
-    private Long average;
+    private Long myScore;
     private Long user_id;
     private Long match_id;
 
