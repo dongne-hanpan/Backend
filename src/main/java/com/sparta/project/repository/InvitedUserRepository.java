@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface InvitedUserRepository extends JpaRepository<InvitedUser, Long> {
     List<InvitedUser> findAllByMatchId(Long match_id);
-    void deleteByMatch_IdAndUser_Id(Long match_id, Long user_id);
+    InvitedUser findByMatchAndUser(Match match, User user);
     boolean existsByMatchAndUser(Match match, User user);
 }

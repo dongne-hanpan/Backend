@@ -1,5 +1,6 @@
 package com.sparta.project.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.project.dto.MatchDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,7 +41,8 @@ public class Match extends Timestamped{
     @Column
     private String place;
 
-    @OneToMany
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "match_id")
     private List<InvitedUser> invitedUsers;
 

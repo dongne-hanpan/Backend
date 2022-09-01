@@ -1,13 +1,10 @@
 package com.sparta.project.model;
-<<<<<<< HEAD
 
-import lombok.Builder;
-import lombok.Getter;
-=======
+import com.sparta.project.dto.AverageDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
->>>>>>> 7bff73339308dfd366848248ea984a0c18e5b94d
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -15,6 +12,7 @@ import javax.persistence.*;
 @Table(name = "users")
 @Entity
 @Getter
+@Setter
 public class User {
 
     @Id
@@ -27,7 +25,6 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-
     @Column
     private String nickname;
 
@@ -35,20 +32,16 @@ public class User {
     private Long totalAverage;  // 볼링 평균 평점
 
     @Column
-    private Long matchCount; // 볼링 게임 수
+    private int matchCount; // 볼링 게임 수
 
     @Column
     private String profileImage;
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 7bff73339308dfd366848248ea984a0c18e5b94d
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
     @Builder
-<<<<<<< HEAD
     public User(String username, String password, String nickname, Authority authority) {
         this.username = username;
         this.password = password;
@@ -56,12 +49,10 @@ public class User {
         this.authority = authority;
     }
 
-=======
-    public User(String nickname, String username, String password, Authority authority) {
-        this.nickname = nickname;
-        this.username = username;
-        this.password = password;
-        this.authority = authority;
+    @Builder
+    public void updateMyScore(Long id, Long totalAverage) {
+        this.id = id;
+        this.totalAverage = totalAverage;
     }
->>>>>>> 7bff73339308dfd366848248ea984a0c18e5b94d
+
 }

@@ -34,8 +34,13 @@ public class MatchController {
     }
 
     @PutMapping("/update/{match_id}")
-    private void updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto){
-        matchService.updateMatch(match_id, matchDto);
+    private MatchDto updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto){
+        try{
+            matchService.updateMatch(match_id, matchDto);
+            return matchDto;
+        }catch (Exception e) {
+            return null;
+        }
     }
 
     @DeleteMapping("/delete/{match_id}")
@@ -47,8 +52,9 @@ public class MatchController {
     private void deleteMatch_NotHost(@PathVariable Long match_id) {
 
     }
-    @PostMapping("/enter")
-    private List<InvitedUser> enterMatch(@RequestBody Long match_id) {
+    @GetMapping("/enter/{match_id}")
+    private List<InvitedUser> enterMatch(@PathVariable Long match_id) {
+        System.out.println(match_id);
         return matchService.enterMatch(match_id);
     }
 

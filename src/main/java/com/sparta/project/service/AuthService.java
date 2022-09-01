@@ -33,6 +33,9 @@ public class AuthService {
         }
 
         User user = userRequestDto.toUser(passwordEncoder);
+
+//        user.setTotalAverage();
+
         return UserResponseDto.of(userRepository.save(user));
     }
 

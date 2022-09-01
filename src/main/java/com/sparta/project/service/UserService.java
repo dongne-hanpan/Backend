@@ -1,6 +1,8 @@
 package com.sparta.project.service;
 
+import com.sparta.project.dto.AverageDto;
 import com.sparta.project.dto.UserResponseDto;
+import com.sparta.project.model.User;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -26,4 +28,7 @@ public class UserService {
                 .map(UserResponseDto::of)
                 .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
     }
+
+
+
 }
