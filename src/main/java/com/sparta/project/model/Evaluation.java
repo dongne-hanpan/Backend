@@ -22,7 +22,7 @@ public class Evaluation {
     private String comment;
 
     @Column
-    private String mannerPoint;
+    private double mannerPoint;
 
     @Column
     private Long match_id;
@@ -32,7 +32,7 @@ public class Evaluation {
     private User user;
 
     @Builder
-    public Evaluation(String nickname, String comment, String mannerPoint, User user, Long match_id) {
+    public Evaluation(String nickname, String comment, double mannerPoint, User user, Long match_id) {
         this.nickname = nickname;
         this.comment = comment;
         this.mannerPoint = mannerPoint;
