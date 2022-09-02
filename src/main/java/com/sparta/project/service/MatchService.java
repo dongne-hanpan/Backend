@@ -49,7 +49,8 @@ public class MatchService {
     //match 입장 신청
     public List<InvitedUser> enterMatch(Long match_id) {
 
-        Match match = validate(match_id);
+        Match match = matchRepository.findById(match_id).orElseThrow(() ->
+                new IllegalArgumentException("게시물이 존재하지 않습니다"));
 
         InvitedUser invitedUser = new InvitedUser();
         invitedUser.setUser(currentLoginUser());
