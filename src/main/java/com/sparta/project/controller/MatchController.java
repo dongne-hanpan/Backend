@@ -28,7 +28,7 @@ public class MatchController {
 
     @PostMapping("/write")
     private MatchDto makeMatch(@RequestBody MatchDto matchDto) {
-        matchDto.setWriter("test");
+        matchDto.setWriter(matchService.currentLoginUser().getNickname());
         matchService.createMatch(matchDto);
         return matchDto;
     }
@@ -48,13 +48,8 @@ public class MatchController {
         matchService.deleteMatch_Host(match_id);
     }
 
-    @DeleteMapping("/deleteSub/{match_id}")
-    private void deleteMatch_NotHost(@PathVariable Long match_id) {
-
-    }
     @GetMapping("/enter/{match_id}")
     private List<InvitedUser> enterMatch(@PathVariable Long match_id) {
-        System.out.println(match_id);
         return matchService.enterMatch(match_id);
     }
 
