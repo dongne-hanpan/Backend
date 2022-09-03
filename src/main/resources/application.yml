@@ -11,3 +11,18 @@ spring:
 
 jwt:
   secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLXNhbmd3b28tc3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFs
+
+#springdoc:
+#  version: '@project.version@'
+#  api-docs:
+#    path: /api-docs
+#  default-consumes-media-type: application/json
+#  default-produces-media-type: application/json
+#  swagger-ui:
+#    operations-sorter: alpha
+#    tags-sorter: alpha
+#    path: /swagger-ui.html
+#    disable-swagger-default-url: true
+#    display-query-params-without-oauth2: true
+#  paths-to-match:
+#    - /api/v1/**
