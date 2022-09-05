@@ -1,7 +1,7 @@
 package com.sparta.project.controller;
 
 import com.sparta.project.dto.MatchDto;
-import com.sparta.project.model.InvitedUser;
+import com.sparta.project.model.UserListInMatch;
 import com.sparta.project.model.Match;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.service.MatchService;
@@ -49,7 +49,7 @@ public class MatchController {
     }
 
     @GetMapping("/enter/{match_id}")
-    private List<InvitedUser> enterMatch(@PathVariable Long match_id) {
+    private List<UserListInMatch> enterMatch(@PathVariable Long match_id) {
         return matchService.enterMatch(match_id);
     }
 

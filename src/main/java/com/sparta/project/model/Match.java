@@ -35,16 +35,10 @@ public class Match extends Timestamped{
     @Column
     private String sports;
 
-    @Column
-    private String time;
-
-    @Column
-    private String place;
-
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "match_id")
-    private List<InvitedUser> invitedUsers;
+    private List<UserListInMatch> userListInMatches;
 
     public Match(MatchDto matchDto) {
         this.writer = matchDto.getWriter();
@@ -52,8 +46,6 @@ public class Match extends Timestamped{
         this.contents = matchDto.getContents();
         this.region = matchDto.getRegion();
         this.sports = matchDto.getSports();
-        this.time = matchDto.getTime();
-        this.place = matchDto.getPlace();
     }
 
     public void updateMatch(MatchDto matchDto) {
@@ -61,7 +53,5 @@ public class Match extends Timestamped{
         this.contents = matchDto.getContents();
         this.region = matchDto.getRegion();
         this.sports = matchDto.getSports();
-        this.time = matchDto.getTime();
-        this.place = matchDto.getPlace();
     }
 }

@@ -1,20 +1,25 @@
 package com.sparta.project.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@Getter
-@Setter
 @NoArgsConstructor
-public class InvitedUser {
+@AllArgsConstructor
+@Builder
+@Getter
+public class Bowling {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+
+    @Column
+    private Long myScore;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

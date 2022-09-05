@@ -1,10 +1,10 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.MatchDto;
-import com.sparta.project.model.InvitedUser;
+import com.sparta.project.model.UserListInMatch;
 import com.sparta.project.model.Match;
 import com.sparta.project.model.User;
-import com.sparta.project.repository.InvitedUserRepository;
+import com.sparta.project.repository.UserLisInMatchRepository;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 public class MatchService {
 
     private final MatchRepository matchRepository;
-    private final InvitedUserRepository invitedUserRepository;
+    private final UserLisInMatchRepository userLisInMatchRepository;
     private final UserRepository userRepository;
 
     //게시글 작성
@@ -29,11 +29,11 @@ public class MatchService {
         matchDto.setWriter(currentLoginUser().getNickname());
         matchRepository.save(match);
 
-        InvitedUser invitedUser = new InvitedUser();
-        invitedUser.setUser(currentLoginUser());
-        invitedUser.setMatch(match);
+        UserListInMatch userListInMatch = new UserListInMatch();
+        userListInMatch.setUser(currentLoginUser());
+        userListInMatch.setMatch(match);
 
-        invitedUserRepository.save(invitedUser);
+        userLisInMatchRepository.save(userListInMatch);
     }
 
     //게시글 수정
@@ -47,19 +47,19 @@ public class MatchService {
     }
 
     //match 입장 신청
-    public List<InvitedUser> enterMatch(Long match_id) {
+    public List<UserListInMatch> enterMatch(Long match_id) {
 
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("게시물이 존재하지 않습니다"));
 
-        InvitedUser invitedUser = new InvitedUser();
-        invitedUser.setUser(currentLoginUser());
-        invitedUser.setMatch(match);
+        UserListInMatch userListInMatch = new UserListInMatch();
+        userListInMatch.setUser(currentLoginUser());
+        userListInMatch.setMatch(match);
 
-        if(invitedUserRepository.existsByMatchAndUser(match, currentLoginUser())) {
+        if(userLisInMatchRepository.existsByMatchAndUser(match, currentLoginUser())) {
             return null;
         }
-        invitedUserRepository.save(invitedUser);
+        userLisInMatchRepository.save(userListInMatch);
 
         return null;
     }
@@ -72,8 +72,8 @@ public class MatchService {
         if(writer.equals(currentLoginUser().getNickname())) {
             matchRepository.deleteById(match_id);
         }else {
-            InvitedUser invitedUser = invitedUserRepository.findByMatchAndUser(match, currentLoginUser());
-            invitedUserRepository.delete(invitedUser);
+            UserListInMatch userListInMatch = userLisInMatchRepository.findByMatchAndUser(match, currentLoginUser());
+            userLisInMatchRepository.delete(userListInMatch);
         }
     }
 
@@ -81,7 +81,7 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("게시물이 존재하지 않습니다"));
 
-        if(!invitedUserRepository.existsByMatchAndUser(match, currentLoginUser())) {
+        if(!userLisInMatchRepository.existsByMatchAndUser(match, currentLoginUser())) {
             throw new IllegalArgumentException("초대되지 않은 방입니다");
         }
         return match;

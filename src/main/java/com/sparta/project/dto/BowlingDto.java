@@ -5,10 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AverageDto {
+public class BowlingDto {
 
     private Long myScore;
-    private Long user_id;
     private Long match_id;
 
 }

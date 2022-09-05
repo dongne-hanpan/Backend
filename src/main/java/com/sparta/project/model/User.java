@@ -1,6 +1,5 @@
 package com.sparta.project.model;
 
-import com.sparta.project.dto.AverageDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,14 +28,7 @@ public class User {
     private String nickname;
 
     @Column
-    private Long totalAverage;  // 볼링 평균 평점
-
-    @Column
-    private int matchCount; // 볼링 게임 수
-
-    @Column
     private String profileImage;
-
 
     @Enumerated(EnumType.STRING)
     private Authority authority;
@@ -47,12 +39,6 @@ public class User {
         this.password = password;
         this.nickname = nickname;
         this.authority = authority;
-    }
-
-    @Builder
-    public void updateMyScore(Long id, Long totalAverage) {
-        this.id = id;
-        this.totalAverage = totalAverage;
     }
 
 }

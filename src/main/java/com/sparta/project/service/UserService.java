@@ -1,15 +1,12 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.AverageDto;
 import com.sparta.project.dto.EvaluationDto;
 import com.sparta.project.dto.ResponseDto;
 import com.sparta.project.dto.UserResponseDto;
-import com.sparta.project.model.Evaluation;
-import com.sparta.project.model.InvitedUser;
-import com.sparta.project.model.Match;
-import com.sparta.project.model.User;
+import com.sparta.project.model.*;
+import com.sparta.project.repository.BowlingRepository;
 import com.sparta.project.repository.EvaluationRepository;
-import com.sparta.project.repository.InvitedUserRepository;
+import com.sparta.project.repository.UserLisInMatchRepository;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final InvitedUserRepository invitedUserRepository;
+    private final UserLisInMatchRepository userLisInMatchRepository;
     private final EvaluationRepository evaluationRepository;
     private final MatchService matchService;
+    private final BowlingRepository bowlingRepository;
 
     @Transactional(readOnly = true)
     public UserResponseDto getUserInfo(String username) {
@@ -44,9 +42,9 @@ public class UserService {
 
     public void evaluateUser(EvaluationDto evaluationDto) {
         int count = 0;
-        List<InvitedUser> list = invitedUserRepository.findAllByMatchId(evaluationDto.getMatch_id());
-        for (InvitedUser invitedUser : list) {
-            if (invitedUser.getUser().getNickname().equals(evaluationDto.getNickname()) || invitedUser.getUser().getUsername().equals(getMyInfo().getUsername())) {
+        List<UserListInMatch> list = userLisInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
+        for (UserListInMatch userListInMatch : list) {
+            if (userListInMatch.getUser().getNickname().equals(evaluationDto.getNickname()) || userListInMatch.getUser().getUsername().equals(getMyInfo().getUsername())) {
                 count++;
             }
         }
@@ -68,27 +66,38 @@ public class UserService {
         double sum = 0;
         User user = matchService.currentLoginUser();
         ResponseDto responseDto = new ResponseDto();
+        long totalAverage = 0;
 
-        for(Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
+        List<String> comment = new ArrayList<>();
+
+        // 매너포인트 계산
+        for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
             sum = sum + evaluation.getMannerPoint();
+            comment.add(evaluation.getComment());
         }
         double mannerPointAverage = sum / (double) evaluationRepository.findAllByNickname(user.getNickname()).size();
 
-        //////////////////////////////////////////////////////////
+        // 마이페이지중 볼링페이지
+        if (sports.equals("bowling")) {
+            long sumScore = 0L;
+            List<Match> list = new ArrayList<>();
+            for (UserListInMatch invitedUser : userLisInMatchRepository.findAllByUser(user)) {
+                if (invitedUser.getMatch().getSports().equals(sports)) list.add(invitedUser.getMatch());
+            }
 
-        List<Match> list = new ArrayList<>();
+            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+            for (Bowling value : bowling) { sumScore = sumScore + value.getMyScore(); }
 
-        for(InvitedUser invitedUser : invitedUserRepository.findAllByUser(user)) {
-            list.add(invitedUser.getMatch());
-        }
-
-        if(sports.equals("bowling")) {
+            if(bowling.size() != 0) {
+                totalAverage = sumScore / bowling.size();
+            }
 
             responseDto.setNickname(user.getNickname());
-            responseDto.setTotalAverage(user.getTotalAverage());
+            responseDto.setScore(totalAverage);
             responseDto.setMannerPoint(mannerPointAverage);
-            responseDto.setTotalMatchCount(user.getMatchCount());
+            responseDto.setMatchCount(bowling.size());
             responseDto.setMatchList(list);
+            responseDto.setComment(comment);
         }
         return responseDto;
     }

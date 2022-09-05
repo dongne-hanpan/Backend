@@ -1,25 +1,20 @@
 package com.sparta.project.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
-public class Average {
+@Setter
+@NoArgsConstructor
+public class UserListInMatch {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-
-    @Column
-    private Long myScore;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

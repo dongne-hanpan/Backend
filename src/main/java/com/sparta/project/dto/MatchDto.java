@@ -10,7 +10,4 @@ public class MatchDto {
     private String contents;
     private Long region;
     private String sports;
-    private String time;
-    private String place;
-
 }
