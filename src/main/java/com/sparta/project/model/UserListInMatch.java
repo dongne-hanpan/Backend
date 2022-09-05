@@ -1,5 +1,6 @@
 package com.sparta.project.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,4 +24,10 @@ public class UserListInMatch {
     @ManyToOne
     @JoinColumn(name = "match_id")
     private Match match;
+
+    @Builder
+    public UserListInMatch(User user, Match match) {
+        this.user = user;
+        this.match = match;
+    }
 }

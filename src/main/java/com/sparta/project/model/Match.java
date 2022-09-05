@@ -1,7 +1,9 @@
 package com.sparta.project.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sparta.project.dto.InviteResponseDto;
 import com.sparta.project.dto.MatchDto;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,17 +37,27 @@ public class Match extends Timestamped{
     @Column
     private String sports;
 
+    @Column
+    private Long max_user;
+
+    @Column
+    @OneToMany
+    @JoinColumn(name = "match_id")
+    private List<RequestUserList> requestUserList;
+
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "match_id")
     private List<UserListInMatch> userListInMatches;
 
+    @Builder
     public Match(MatchDto matchDto) {
         this.writer = matchDto.getWriter();
         this.title = matchDto.getTitle();
         this.contents = matchDto.getContents();
         this.region = matchDto.getRegion();
         this.sports = matchDto.getSports();
+        this.max_user = matchDto.getMax_user();
     }
 
     public void updateMatch(MatchDto matchDto) {

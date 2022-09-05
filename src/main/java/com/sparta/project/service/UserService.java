@@ -1,7 +1,7 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.EvaluationDto;
-import com.sparta.project.dto.ResponseDto;
+import com.sparta.project.dto.MyPageResponseDto;
 import com.sparta.project.dto.UserResponseDto;
 import com.sparta.project.model.*;
 import com.sparta.project.repository.BowlingRepository;
@@ -62,22 +62,18 @@ public class UserService {
         count = 0;
     }
 
-    public ResponseDto myPage(String sports) {
-        double sum = 0;
+    public MyPageResponseDto myPage(String sports) {
         User user = matchService.currentLoginUser();
-        ResponseDto responseDto = new ResponseDto();
         long totalAverage = 0;
 
         List<String> comment = new ArrayList<>();
 
-        // 매너포인트 계산
+        // 입력된 코멘트 불러우기
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
-            sum = sum + evaluation.getMannerPoint();
             comment.add(evaluation.getComment());
         }
-        double mannerPointAverage = sum / (double) evaluationRepository.findAllByNickname(user.getNickname()).size();
 
-        // 마이페이지중 볼링페이지
+        // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
             long sumScore = 0L;
             List<Match> list = new ArrayList<>();
@@ -92,14 +88,32 @@ public class UserService {
                 totalAverage = sumScore / bowling.size();
             }
 
-            responseDto.setNickname(user.getNickname());
-            responseDto.setScore(totalAverage);
-            responseDto.setMannerPoint(mannerPointAverage);
-            responseDto.setMatchCount(bowling.size());
-            responseDto.setMatchList(list);
-            responseDto.setComment(comment);
+            return MyPageResponseDto.builder()
+                    .comment(comment)
+                    .nickname(user.getNickname())
+                    .mannerPoint(calculateMannerPoint(user))
+                    .matchCount(bowling.size())
+                    .matchList(list)
+                    .profileImage("test")
+                    .score(totalAverage)
+                    .build();
         }
-        return responseDto;
+        return null;
+    }
+
+    public double calculateMannerPoint(User user) {
+
+        double sum = 0;
+        double mannerPointAverage = 0;
+
+        for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
+            sum += evaluation.getMannerPoint();
+        }
+        if(evaluationRepository.findAllByNickname(user.getNickname()).size() != 0 ) {
+            mannerPointAverage = sum / evaluationRepository.findAllByNickname(user.getNickname()).size();
+        }
+
+        return mannerPointAverage;
     }
 
 }

@@ -18,8 +18,6 @@ public class BowlingService {
     private final BowlingRepository bowlingRepository;
     private final MatchService matchService;
 
-    private final UserRepository userRepository;
-
     public Long inputMyScore(BowlingDto bowlingDto) {
 
         long sum = 0;
@@ -34,12 +32,20 @@ public class BowlingService {
                     .match(match)
                     .build());
 
-            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+            return calculateAverageScore(user);
+        }
+        return 0L;
+    }
 
-            for (Bowling value : bowling) {
-                sum = sum + value.getMyScore();
-            }
+    public Long calculateAverageScore(User user) {
+        long sum = 0;
+        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
+        for (Bowling value : bowling) {
+            sum += value.getMyScore();
+        }
+
+        if(bowling.size() != 0) {
             return sum / bowling.size();
         }
         return 0L;

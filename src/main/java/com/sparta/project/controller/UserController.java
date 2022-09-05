@@ -1,7 +1,7 @@
 package com.sparta.project.controller;
 
 import com.sparta.project.dto.EvaluationDto;
-import com.sparta.project.dto.ResponseDto;
+import com.sparta.project.dto.MyPageResponseDto;
 import com.sparta.project.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @GetMapping("/mypage/{sports}")
-    private ResponseDto myPage(@PathVariable String sports) {
+    private MyPageResponseDto myPage(@PathVariable String sports) {
             return userService.myPage(sports);
         }
 }
