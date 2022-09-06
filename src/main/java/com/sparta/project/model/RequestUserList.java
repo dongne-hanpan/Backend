@@ -1,6 +1,7 @@
 package com.sparta.project.model;
 
 import com.sparta.project.dto.InviteResponseDto;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Setter
+@Getter
 @NoArgsConstructor
 public class RequestUserList {
 
@@ -34,4 +36,5 @@ public class RequestUserList {
         this.averageScore = inviteResponseDto.getAverageScore();
         this.mannerPoint = inviteResponseDto.getMannerPoint();
     }
+
 }

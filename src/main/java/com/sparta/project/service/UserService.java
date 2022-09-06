@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,15 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserLisInMatchRepository userLisInMatchRepository;
     private final EvaluationRepository evaluationRepository;
-    private final MatchService matchService;
     private final BowlingRepository bowlingRepository;
-
-    @Transactional(readOnly = true)
-    public UserResponseDto getUserInfo(String username) {
-        return userRepository.findByUsername(username)
-                .map(UserResponseDto::of)
-                .orElseThrow(() -> new RuntimeException("유저 정보가 없습니다."));
-    }
 
     // 현재 SecurityContext 에 있는 유저 정보 가져오기
     @Transactional(readOnly = true)
@@ -63,12 +56,13 @@ public class UserService {
     }
 
     public MyPageResponseDto myPage(String sports) {
-        User user = matchService.currentLoginUser();
+        User user = userRepository.findByNickname(getMyInfo().getNickname());
         long totalAverage = 0;
 
         List<String> comment = new ArrayList<>();
 
         // 입력된 코멘트 불러우기
+
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
             comment.add(evaluation.getComment());
         }

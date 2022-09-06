@@ -15,12 +15,13 @@ public class UserResponseDto {
 
     private Long id;
 
+    private String nickname;
 
     public static UserResponseDto of(User user) {
         return new UserResponseDto(
                 user.getUsername(),
-                user.getId()
-
+                user.getId(),
+                user.getNickname()
         );
     }
 }

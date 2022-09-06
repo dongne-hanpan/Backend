@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findAllByRegion(Long region);
+    List<Match> findAllByWriter(String writer);
 }

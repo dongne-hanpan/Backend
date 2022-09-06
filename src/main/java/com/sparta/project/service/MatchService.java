@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -80,11 +82,12 @@ public class MatchService {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        String HOST = match.getWriter();
+        String Host = match.getWriter();
 
-        if (!currentLoginUser().getNickname().equals(HOST)) {
+        if (!currentLoginUser().getNickname().equals(Host)) {
             throw new IllegalArgumentException("권한이 없습니다");
         }
+
         User user = userRepository.findByNickname(inviteRequestDto.getNickname());
         RequestUserList requestUserList = requestUserListRepository.findByNickname(user.getNickname());
 
@@ -101,6 +104,31 @@ public class MatchService {
         }
     }
 
+    public List<InviteResponseDto> showRequestUserList() {
+
+        List<Match> list = matchRepository.findAllByWriter(currentLoginUser().getNickname());
+        List<InviteResponseDto> userList = new ArrayList<>();
+        if(list.size() != 0) {
+            for (Match match : list) {
+                for(int i=0; i<requestUserListRepository.findAllByMatch(match).size(); i++) {
+                    User user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
+                    userList.add(InviteResponseDto.builder()
+                            .match_id(match.getId())
+                            .nickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname())
+                            .matchCount(bowlingRepository.findAllByUser(user).size())
+                            .averageScore(calculateAverageScore(user))
+                            .mannerPoint(calculateMannerPoint(user))
+                            .build()
+                    );
+                }
+
+            }
+        }else {
+            return null;
+        }
+        return userList;
+
+    }
 
     @Transactional
     public void deleteMatch_Host(Long match_id) {
@@ -139,7 +167,7 @@ public class MatchService {
         for (Bowling value : bowling) {
             sum += value.getMyScore();
         }
-        if(bowling.size() != 0) {
+        if (bowling.size() != 0) {
             return sum / bowling.size();
         }
         return 0L;
@@ -153,7 +181,7 @@ public class MatchService {
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
             sum += evaluation.getMannerPoint();
         }
-        if(evaluationRepository.findAllByNickname(user.getNickname()).size() != 0 ) {
+        if (evaluationRepository.findAllByNickname(user.getNickname()).size() != 0) {
             mannerPointAverage = sum / evaluationRepository.findAllByNickname(user.getNickname()).size();
         }
 

@@ -24,7 +24,7 @@ public class MatchController {
 
     @GetMapping("/list/{region}/{sports}")
     private List<Match> getMatchList(@PathVariable Long region, @PathVariable String sports) {
-        if(sports.equals("bowling")) {
+        if (sports.equals("bowling")) {
             return matchRepository.findAllByRegion(region);
         }
         return null;
@@ -38,11 +38,11 @@ public class MatchController {
     }
 
     @PutMapping("/update/{match_id}")
-    private MatchDto updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto){
-        try{
+    private MatchDto updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto) {
+        try {
             matchService.updateMatch(match_id, matchDto);
             return matchDto;
-        }catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -64,4 +64,9 @@ public class MatchController {
         matchService.permitUser(inviteRequestDto);
     }
 
+    //신청 유저 목록 매치별로 보여주기
+    @GetMapping("/request")
+    private List<InviteResponseDto> requestUserList() {
+        return matchService.showRequestUserList();
+    }
 }
