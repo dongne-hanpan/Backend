@@ -12,5 +12,6 @@ public class InviteResponseDto {
     private String nickname;
     private double mannerPoint;
     private Long averageScore;
+    private int matchCount;
     private Long match_id;
 }

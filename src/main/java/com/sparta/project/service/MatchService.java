@@ -56,15 +56,16 @@ public class MatchService {
     public InviteResponseDto enterMatch(Long match_id) {
 
         User user = currentLoginUser();
+        Match match = matchRepository.findById(match_id).orElseThrow();
+        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
         InviteResponseDto inviteResponseDto = InviteResponseDto.builder()
                 .averageScore(calculateAverageScore(user))
                 .mannerPoint(calculateMannerPoint(user))
                 .match_id(match_id)
+                .matchCount(bowling.size())
                 .nickname(user.getNickname())
                 .build();
-
-        Match match = matchRepository.findById(match_id).orElseThrow();
 
         RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
 

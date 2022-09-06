@@ -22,12 +22,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.signup(userRequestDto));
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     public boolean existUsername(@PathVariable String username) {
         return !userRepository.existsByUsername(username);
     }
 
-    @GetMapping("/{nickname}")
+    @GetMapping("/nickname/{nickname}")
     public boolean existNickname(@PathVariable String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
