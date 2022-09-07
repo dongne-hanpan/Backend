@@ -1,6 +1,5 @@
 package com.sparta.project.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter

@@ -5,7 +5,6 @@ import com.sparta.project.model.Bowling;
 import com.sparta.project.model.Match;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.BowlingRepository;
-import com.sparta.project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

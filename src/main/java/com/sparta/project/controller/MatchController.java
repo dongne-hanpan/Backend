@@ -3,9 +3,6 @@ package com.sparta.project.controller;
 import com.sparta.project.dto.InviteRequestDto;
 import com.sparta.project.dto.InviteResponseDto;
 import com.sparta.project.dto.MatchDto;
-import com.sparta.project.model.RequestUserList;
-import com.sparta.project.model.User;
-import com.sparta.project.model.UserListInMatch;
 import com.sparta.project.model.Match;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.service.MatchService;
@@ -16,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/match")
-@RestController
+@RestController // = controller + responsebody
 public class MatchController {
 
     private final MatchRepository matchRepository;

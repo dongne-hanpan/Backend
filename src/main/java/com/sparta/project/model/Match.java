@@ -1,7 +1,6 @@
 package com.sparta.project.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sparta.project.dto.InviteResponseDto;
 import com.sparta.project.dto.MatchDto;
 import lombok.Builder;
 import lombok.Getter;

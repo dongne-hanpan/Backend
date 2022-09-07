@@ -3,8 +3,6 @@ package com.sparta.project.dto;
 
 import lombok.Getter;
 
-import javax.persistence.Column;
-
 @Getter
 public class EvaluationDto {
 

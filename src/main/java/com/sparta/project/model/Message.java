@@ -26,6 +26,7 @@ public class Message extends Timestamped {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "match_id")
     private Match match;
 
 }

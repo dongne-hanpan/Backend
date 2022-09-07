@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'mysql:mysql-connector-java'
@@ -40,11 +41,27 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
+	//채팅 stomp 관련 의존성
+
+	implementation 'org.webjars:sockjs-client:1.1.2'
+	implementation 'org.webjars:stomp-websocket:2.3.3-1'
+
+	// 채팅 테스트 뷰 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-freemarker'
+	implementation 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.webjars.bower:bootstrap:4.3.1'
+	implementation 'org.webjars.bower:vue:2.5.16'
+	implementation 'org.webjars.bower:axios:0.17.1'
+	implementation 'com.google.code.gson:gson:2.8.0'
+	implementation 'org.webjars:webjars-locator-core'
+	implementation 'org.webjars:jquery:3.1.1-1'
+
 	//swagger
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()

@@ -6,14 +6,12 @@ import com.sparta.project.dto.MatchDto;
 import com.sparta.project.model.*;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Request;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -59,6 +57,7 @@ public class MatchService {
 
         User user = currentLoginUser();
         Match match = matchRepository.findById(match_id).orElseThrow();
+
         List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
         InviteResponseDto inviteResponseDto = InviteResponseDto.builder()
@@ -108,6 +107,7 @@ public class MatchService {
 
         List<Match> list = matchRepository.findAllByWriter(currentLoginUser().getNickname());
         List<InviteResponseDto> userList = new ArrayList<>();
+
         if(list.size() != 0) {
             for (Match match : list) {
                 for(int i=0; i<requestUserListRepository.findAllByMatch(match).size(); i++) {
