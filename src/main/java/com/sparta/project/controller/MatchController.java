@@ -13,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/match")
-@RestController // = controller + responsebody
+@RestController
 public class MatchController {
 
     private final MatchRepository matchRepository;
@@ -46,7 +46,7 @@ public class MatchController {
 
     @DeleteMapping("/delete/{match_id}")
     private void deleteMatch_Host(@PathVariable Long match_id) {
-        matchService.deleteMatch_Host(match_id);
+        matchService.deleteMatch(match_id);
     }
 
     //입장신청

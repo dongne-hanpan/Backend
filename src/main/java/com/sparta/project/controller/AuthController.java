@@ -19,7 +19,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDto> signup(@RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.ok(authService.signup(userRequestDto));
+        try {
+            return ResponseEntity.ok(authService.signup(userRequestDto));
+        }catch (Exception e) {
+            return null;
+        }
     }
 
     @GetMapping("/username/{username}")
@@ -34,7 +38,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.ok(authService.login(userRequestDto));
+        try {
+            return ResponseEntity.ok(authService.login(userRequestDto));
+        }catch (Exception e) {
+            return null;
+        }
+
     }
 
     @PostMapping("/reissue")

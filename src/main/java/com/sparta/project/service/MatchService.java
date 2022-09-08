@@ -131,7 +131,7 @@ public class MatchService {
     }
 
     @Transactional
-    public void deleteMatch_Host(Long match_id) {
+    public void deleteMatch(Long match_id) {
         Match match = validate(match_id);
         String writer = match.getWriter();
 

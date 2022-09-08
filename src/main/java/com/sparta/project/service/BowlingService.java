@@ -19,8 +19,6 @@ public class BowlingService {
 
     public Long inputMyScore(BowlingDto bowlingDto) {
 
-        long sum = 0;
-
         Match match = matchService.validate(bowlingDto.getMatch_id());
         User user = matchService.currentLoginUser();
 
