@@ -28,42 +28,41 @@ public class MatchController {
     }
 
     @PostMapping("/write")
-    private MatchDto createMatch(@RequestBody MatchDto matchDto) {
-        matchDto.setWriter(matchService.currentLoginUser().getNickname());
-        matchService.createMatch(matchDto);
+    private MatchDto createMatch(@RequestBody MatchDto matchDto, @RequestHeader(value = "Authorization") String token) {
+        matchService.createMatch(matchDto, token);
         return matchDto;
     }
 
     @PutMapping("/update/{match_id}")
-    private MatchDto updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto) {
+    private MatchDto updateMatch(@PathVariable Long match_id, @RequestBody MatchDto matchDto, @RequestHeader(value = "Authorization") String token) {
         try {
-            matchService.updateMatch(match_id, matchDto);
+            matchService.updateMatch(match_id, matchDto, token);
             return matchDto;
         } catch (Exception e) {
-            return null;
+            return null;  // 수정 실패시 에러반환 필요
         }
     }
 
     @DeleteMapping("/delete/{match_id}")
-    private void deleteMatch_Host(@PathVariable Long match_id) {
-        matchService.deleteMatch(match_id);
+    private void deleteMatch_Host(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        matchService.deleteMatch(match_id, token);
     }
 
     //입장신청
     @GetMapping("/enter/{match_id}")
-    private InviteResponseDto enterMatch(@PathVariable Long match_id) {
-        return matchService.enterMatch(match_id);
+    private InviteResponseDto enterMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return matchService.enterMatch(match_id, token);
     }
 
     //입장 수락 or 거절
     @PostMapping("/permit")
-    private void permitUser(@RequestBody InviteRequestDto inviteRequestDto) {
-        matchService.permitUser(inviteRequestDto);
+    private void permitUser(@RequestBody InviteRequestDto inviteRequestDto, @RequestHeader(value = "Authorization") String token) {
+        matchService.permitUser(inviteRequestDto, token);
     }
 
     //신청 유저 목록 매치별로 보여주기
     @GetMapping("/request")
-    private List<InviteResponseDto> requestUserList() {
-        return matchService.showRequestUserList();
+    private List<InviteResponseDto> requestUserList(@RequestHeader(value = "Authorization") String token) {
+        return matchService.showRequestUserList(token);
     }
 }

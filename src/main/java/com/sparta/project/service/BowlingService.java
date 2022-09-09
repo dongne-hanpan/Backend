@@ -5,6 +5,8 @@ import com.sparta.project.model.Bowling;
 import com.sparta.project.model.Match;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.BowlingRepository;
+import com.sparta.project.repository.UserRepository;
+import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +17,15 @@ import java.util.List;
 public class BowlingService {
 
     private final BowlingRepository bowlingRepository;
-    private final MatchService matchService;
+    private final ValidationService validationService;
+    private final AuthService authService;
+    private final CalculateService calculateService;
 
-    public Long inputMyScore(BowlingDto bowlingDto) {
+    public Long inputMyScore(BowlingDto bowlingDto, String token) {
 
-        Match match = matchService.validate(bowlingDto.getMatch_id());
-        User user = matchService.currentLoginUser();
+        Match match = validationService.validate(bowlingDto.getMatch_id(), token);
+
+        User user = authService.getUserIdByToken(token);
 
         if(!bowlingRepository.existsByUserAndMatch(user, match) && bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
             bowlingRepository.save(Bowling.builder()
@@ -29,23 +34,8 @@ public class BowlingService {
                     .match(match)
                     .build());
 
-            return calculateAverageScore(user);
+            return calculateService.calculateAverageScore(user);
         }
         return 0L;
     }
-
-    public Long calculateAverageScore(User user) {
-        long sum = 0;
-        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
-
-        for (Bowling value : bowling) {
-            sum += value.getMyScore();
-        }
-
-        if(bowling.size() != 0) {
-            return sum / bowling.size();
-        }
-        return 0L;
-    }
-
 }

@@ -12,8 +12,8 @@ public class TokenDto {
 
     private String grantType;
     private String accessToken;
-    private String refreshToken;
-    private Long accessTokenExpiresIn;
+//    private String refreshToken;
+//    private Long accessTokenExpiresIn;
     private String username;
     private String nickname;
     private String profileImage;

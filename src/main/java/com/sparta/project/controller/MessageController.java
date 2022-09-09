@@ -9,10 +9,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,7 +33,7 @@ public class MessageController {
     @ResponseBody
     //메세지 채팅방에 뿌려주기
     @GetMapping("/chat/message/{match_id}")
-    public List<ChatMessageDto> showMessage(@PathVariable Long match_id) {
-        return messageService.showMessage(match_id);
+    public List<ChatMessageDto> showMessage(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return messageService.showMessage(match_id, token);
     }
 }

@@ -27,7 +27,8 @@ public class MessageService {
     private final MatchRepository matchRepository;
     private final UserLisInMatchRepository userLisInMatchRepository;
     private final MessageRepository messageRepository;
-    private final MatchService matchService;
+    private final AuthService authService;
+
     public ChatMessageDto messageSender(ChatMessageDto chatMessageDto, Long match_id, String token) {
 
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
@@ -54,10 +55,10 @@ public class MessageService {
         return chatMessageDto;
     }
 
-    public List<ChatMessageDto> showMessage(Long match_id) {
+    public List<ChatMessageDto> showMessage(Long match_id, String token) {
 
         Match match = matchRepository.findById(match_id).orElseThrow();
-        User user = matchService.currentLoginUser();
+        User user = authService.getUserIdByToken(token);
 
         if (!userLisInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");

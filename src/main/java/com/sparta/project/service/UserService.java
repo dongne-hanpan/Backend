@@ -23,6 +23,7 @@ public class UserService {
     private final UserLisInMatchRepository userLisInMatchRepository;
     private final EvaluationRepository evaluationRepository;
     private final BowlingRepository bowlingRepository;
+    private final CalculateService calculateService;
 
     // 현재 SecurityContext 에 있는 유저 정보 가져오기
     @Transactional(readOnly = true)
@@ -84,7 +85,7 @@ public class UserService {
             return MyPageResponseDto.builder()
                     .comment(comment)
                     .nickname(user.getNickname())
-                    .mannerPoint(calculateMannerPoint(user))
+                    .mannerPoint(calculateService.calculateMannerPoint(user))
                     .matchCount(bowling.size())
                     .matchList(list)
                     .profileImage("test")
@@ -94,19 +95,6 @@ public class UserService {
         return null;
     }
 
-    public double calculateMannerPoint(User user) {
 
-        double sum = 0;
-        double mannerPointAverage = 0;
-
-        for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
-            sum += evaluation.getMannerPoint();
-        }
-        if(evaluationRepository.findAllByNickname(user.getNickname()).size() != 0 ) {
-            mannerPointAverage = sum / evaluationRepository.findAllByNickname(user.getNickname()).size();
-        }
-
-        return mannerPointAverage;
-    }
 
 }

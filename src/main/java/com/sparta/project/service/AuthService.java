@@ -47,7 +47,7 @@ public class AuthService {
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .key(authentication.getName())
-                .value(tokenDto.getRefreshToken())
+//                .value(tokenDto.getRefreshToken())
                 .build();
 
         refreshTokenRepository.save(refreshToken);
@@ -58,26 +58,33 @@ public class AuthService {
         return tokenDto;
     }
 
-    @Transactional
-    public TokenDto reissue(TokenRequestDto tokenRequestDto) {
-        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
-            throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
-        }
-
-        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
-
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
-
-        if (!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())) {
-            throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
-        }
-
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
-
-        return tokenDto;
+    public User getUserIdByToken(String token) {
+        Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
+        Long user_id = Long.parseLong(authentication.getName());
+        return userRepository.findById(user_id).orElseThrow(() ->
+                new IllegalArgumentException("유저 정보가 없습니다."));
     }
+
+//    @Transactional
+//    public TokenDto reissue(TokenRequestDto tokenRequestDto) {
+//        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
+//            throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
+//        }
+//
+//        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+//
+//        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+//                .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+//
+//        if (!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())) {
+//            throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
+//        }
+//
+//        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+//
+//        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
+//        refreshTokenRepository.save(newRefreshToken);
+//
+//        return tokenDto;
+//    }
 }

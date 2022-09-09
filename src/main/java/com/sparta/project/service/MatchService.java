@@ -1,10 +1,12 @@
 package com.sparta.project.service;
 
+import antlr.Token;
 import com.sparta.project.dto.InviteRequestDto;
 import com.sparta.project.dto.InviteResponseDto;
 import com.sparta.project.dto.MatchDto;
 import com.sparta.project.model.*;
 import com.sparta.project.repository.*;
+import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,48 +23,54 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final UserLisInMatchRepository userLisInMatchRepository;
     private final UserRepository userRepository;
-    //private final BowlingService bowlingService;
-    //private final UserService userService;
-    private final EvaluationRepository evaluationRepository;
+    private final CalculateService calculateService;
     private final BowlingRepository bowlingRepository;
     private final RequestUserListRepository requestUserListRepository;
+    private final ValidationService validationService;
+    private final AuthService authService;
 
     //게시글 작성
-    public void createMatch(MatchDto matchDto) {
+    public void createMatch(MatchDto matchDto, String token) {
 
-        matchDto.setWriter(currentLoginUser().getNickname());
+        User user = authService.getUserIdByToken(token);
+
+        matchDto.setWriter(user.getNickname());
 
         Match match = new Match(matchDto);
         matchRepository.save(match);
 
         //작성자 본인을 match에 포함되도록 저장
         UserListInMatch userListInMatch = new UserListInMatch();
-        userListInMatch.setUser(currentLoginUser());
+        userListInMatch.setUser(user);
         userListInMatch.setMatch(match);
         userLisInMatchRepository.save(userListInMatch);
     }
 
     //게시글 수정
     @Transactional
-    public void updateMatch(Long match_id, MatchDto matchDto) {
-        Match match = validate(match_id);
+    public void updateMatch(Long match_id, MatchDto matchDto, String token) {
 
-        if (match.getWriter().equals(currentLoginUser().getNickname())) {
+        Match match = validationService.validate(match_id, token);
+
+        User user = authService.getUserIdByToken(token);
+
+        if (match.getWriter().equals(user.getNickname())) {
             match.updateMatch(matchDto);
         }
     }
 
     //match 입장 신청
-    public InviteResponseDto enterMatch(Long match_id) {
+    public InviteResponseDto enterMatch(Long match_id, String token) {
 
-        User user = currentLoginUser();
+        User user = authService.getUserIdByToken(token);
+
         Match match = matchRepository.findById(match_id).orElseThrow();
 
         List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
         InviteResponseDto inviteResponseDto = InviteResponseDto.builder()
-                .averageScore(calculateAverageScore(user))
-                .mannerPoint(calculateMannerPoint(user))
+                .averageScore(calculateService.calculateAverageScore(user))
+                .mannerPoint(calculateService.calculateMannerPoint(user))
                 .match_id(match_id)
                 .matchCount(bowling.size())
                 .nickname(user.getNickname())
@@ -77,17 +85,17 @@ public class MatchService {
     }
 
     //입장 수락 or 거절
-    public void permitUser(InviteRequestDto inviteRequestDto) {
+    public void permitUser(InviteRequestDto inviteRequestDto, String token) {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        String Host = match.getWriter();
+        User user = authService.getUserIdByToken(token);
 
-        if (!currentLoginUser().getNickname().equals(Host)) {
+        if (!user.getNickname().equals(match.getWriter())) {
             throw new IllegalArgumentException("권한이 없습니다");
         }
 
-        User user = userRepository.findByNickname(inviteRequestDto.getNickname());
+        user = userRepository.findByNickname(inviteRequestDto.getNickname());
         RequestUserList requestUserList = requestUserListRepository.findByNickname(user.getNickname());
 
         if (inviteRequestDto.isPermit()) {
@@ -103,21 +111,23 @@ public class MatchService {
         }
     }
 
-    public List<InviteResponseDto> showRequestUserList() {
+    public List<InviteResponseDto> showRequestUserList(String token) {
 
-        List<Match> list = matchRepository.findAllByWriter(currentLoginUser().getNickname());
+        User user = authService.getUserIdByToken(token);
+
+        List<Match> list = matchRepository.findAllByWriter(user.getNickname());
         List<InviteResponseDto> userList = new ArrayList<>();
 
         if(list.size() != 0) {
             for (Match match : list) {
                 for(int i=0; i<requestUserListRepository.findAllByMatch(match).size(); i++) {
-                    User user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
+                    user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
                     userList.add(InviteResponseDto.builder()
                             .match_id(match.getId())
                             .nickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname())
                             .matchCount(bowlingRepository.findAllByUser(user).size())
-                            .averageScore(calculateAverageScore(user))
-                            .mannerPoint(calculateMannerPoint(user))
+                            .averageScore(calculateService.calculateAverageScore(user))
+                            .mannerPoint(calculateService.calculateMannerPoint(user))
                             .build()
                     );
                 }
@@ -131,60 +141,17 @@ public class MatchService {
     }
 
     @Transactional
-    public void deleteMatch(Long match_id) {
-        Match match = validate(match_id);
+    public void deleteMatch(Long match_id, String token) {
+        Match match = validationService.validate(match_id, token);
         String writer = match.getWriter();
+        User user = authService.getUserIdByToken(token);
 
-        if (writer.equals(currentLoginUser().getNickname())) {
+        if (writer.equals(user.getNickname())) {
             matchRepository.deleteById(match_id);
         } else {
-            UserListInMatch userListInMatch = userLisInMatchRepository.findByMatchAndUser(match, currentLoginUser());
+            UserListInMatch userListInMatch = userLisInMatchRepository.findByMatchAndUser(match, user);
             userLisInMatchRepository.delete(userListInMatch);
         }
     }
 
-    public Match validate(Long match_id) {
-        Match match = matchRepository.findById(match_id).orElseThrow(() ->
-                new IllegalArgumentException("게시물이 존재하지 않습니다"));
-
-        if (!userLisInMatchRepository.existsByMatchAndUser(match, currentLoginUser())) {
-            throw new IllegalArgumentException("초대되지 않은 방입니다");
-        }
-        return match;
-    }
-
-    public User currentLoginUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
-        return userRepository.findById(Long.parseLong(userId)).orElseThrow(() ->
-                new IllegalArgumentException("존재하지 않는 회원"));
-    }
-
-    public Long calculateAverageScore(User user) {
-        long sum = 0;
-        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
-
-        for (Bowling value : bowling) {
-            sum += value.getMyScore();
-        }
-        if (bowling.size() != 0) {
-            return sum / bowling.size();
-        }
-        return 0L;
-    }
-
-    public double calculateMannerPoint(User user) {
-
-        double sum = 0;
-        double mannerPointAverage = 0;
-
-        for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
-            sum += evaluation.getMannerPoint();
-        }
-        if (evaluationRepository.findAllByNickname(user.getNickname()).size() != 0) {
-            mannerPointAverage = sum / evaluationRepository.findAllByNickname(user.getNickname()).size();
-        }
-
-        return mannerPointAverage;
-    }
 }
