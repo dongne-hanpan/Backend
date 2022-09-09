@@ -14,6 +14,8 @@ public class TokenDto {
     private String accessToken;
     private String refreshToken;
     private Long accessTokenExpiresIn;
-    private User user;
+    private String username;
+    private String nickname;
+    private String profileImage;
 
 }

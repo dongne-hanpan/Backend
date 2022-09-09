@@ -1,9 +1,6 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.TokenDto;
-import com.sparta.project.dto.TokenRequestDto;
-import com.sparta.project.dto.UserRequestDto;
-import com.sparta.project.dto.UserResponseDto;
+import com.sparta.project.dto.*;
 import com.sparta.project.model.RefreshToken;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.RefreshTokenRepository;
@@ -34,17 +31,15 @@ public class AuthService {
 
         User user = userRequestDto.toUser(passwordEncoder);
 
-//        user.setTotalAverage();
-
         return UserResponseDto.of(userRepository.save(user));
     }
 
     @Transactional
-    public TokenDto login(UserRequestDto userRequestDto) {
+    public TokenDto login(LoginRequestDto loginRequestDto) {
 
-        User user = userRepository.findByUsername(userRequestDto.getUsername()).orElseThrow();
+        User user = userRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow();
 
-        UsernamePasswordAuthenticationToken authenticationToken = userRequestDto.toAuthentication();
+        UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -56,7 +51,9 @@ public class AuthService {
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-        tokenDto.setUser(user);
+        tokenDto.setNickname(user.getNickname());
+        tokenDto.setUsername(user.getUsername());
+        tokenDto.setProfileImage(user.getProfileImage());
 
         return tokenDto;
     }

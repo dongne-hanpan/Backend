@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Getter
-@Setter
+@Table(name = "matches")
 @Entity
 @NoArgsConstructor
 public class Match extends Timestamped{

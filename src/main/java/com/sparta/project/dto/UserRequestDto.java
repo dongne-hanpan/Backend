@@ -26,10 +26,7 @@ public class UserRequestDto {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[0-9])(?!.*[^a-zA-z0-9]).{4,32}$",
             message = "비밀번호는 4~32 자리이면서 1개 이상의 알파벳, 숫자를 포함해야합니다.")
     private String password;
-
     private String nickname;
-
-
     public User toUser(PasswordEncoder passwordEncoder) {
         return User.builder()
                 .nickname(nickname)
@@ -37,9 +34,5 @@ public class UserRequestDto {
                 .password(passwordEncoder.encode(password))
                 .authority(Authority.ROLE_USER)
                 .build();
-    }
-
-    public UsernamePasswordAuthenticationToken toAuthentication() {
-        return new UsernamePasswordAuthenticationToken(username, password);
     }
 }
