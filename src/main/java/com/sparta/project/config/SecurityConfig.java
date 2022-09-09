@@ -24,6 +24,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
+    private static final String[] AUTH_ARR = {
+            "/swagger/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**"
+    };
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         web.ignoring()
+                .antMatchers(AUTH_ARR)
                 .antMatchers("/h2-console/**", "/favicon.ico");
     }
 
@@ -72,7 +79,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/api/match/**").permitAll()
+                .antMatchers("/api/match/**").permitAll()
                 .antMatchers("/").permitAll()
                 .anyRequest().permitAll()
 
