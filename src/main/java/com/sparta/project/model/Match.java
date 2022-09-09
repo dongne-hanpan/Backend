@@ -40,6 +40,7 @@ public class Match extends Timestamped{
     @Column
     private Long max_user;
 
+    @JsonIgnore
     @OneToMany
     @JoinColumn(name = "match_id")
     private List<RequestUserList> requestUserList;
