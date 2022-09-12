@@ -1,13 +1,10 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.EvaluationDto;
-import com.sparta.project.dto.MyPageResponseDto;
-import com.sparta.project.dto.UserResponseDto;
+import com.sparta.project.dto.user.EvaluationDto;
+import com.sparta.project.dto.user.MyPageResponseDto;
+import com.sparta.project.dto.user.UserResponseDto;
 import com.sparta.project.model.*;
-import com.sparta.project.repository.BowlingRepository;
-import com.sparta.project.repository.EvaluationRepository;
-import com.sparta.project.repository.UserLisInMatchRepository;
-import com.sparta.project.repository.UserRepository;
+import com.sparta.project.repository.*;
 import com.sparta.project.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,24 +21,20 @@ public class UserService {
     private final EvaluationRepository evaluationRepository;
     private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
+    private final AuthService authService;
 
-    // 현재 SecurityContext 에 있는 유저 정보 가져오기
-    @Transactional(readOnly = true)
-    public UserResponseDto getMyInfo() {
-        return userRepository.findById(SecurityUtil.getCurrentUserId())
-                .map(UserResponseDto::of)
-                .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
-    }
+    public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
-    public void evaluateUser(EvaluationDto evaluationDto) {
         int count = 0;
+
+        User user = authService.getUserByToken(token);
+
         List<UserListInMatch> list = userLisInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
         for (UserListInMatch userListInMatch : list) {
-            if (userListInMatch.getUser().getNickname().equals(evaluationDto.getNickname()) || userListInMatch.getUser().getUsername().equals(getMyInfo().getUsername())) {
+            if (userListInMatch.getUser().getNickname().equals(evaluationDto.getNickname()) || userListInMatch.getUser().getUsername().equals(user.getUsername())) {
                 count++;
             }
         }
-
         if (count == 2) {
             evaluationRepository.save(Evaluation.builder()
                     .nickname(evaluationDto.getNickname())
@@ -53,16 +46,16 @@ public class UserService {
 
         }
         count = 0;
+
     }
 
-    public MyPageResponseDto myPage(String sports) {
-        User user = userRepository.findByNickname(getMyInfo().getNickname());
+    public MyPageResponseDto myPage(String sports, String token) {
+        User user = authService.getUserByToken(token);
         long totalAverage = 0;
 
         List<String> comment = new ArrayList<>();
 
-        // 입력된 코멘트 불러우기
-
+        // 입력된 코멘트 불러오기
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
             comment.add(evaluation.getComment());
         }

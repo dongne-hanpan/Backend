@@ -45,4 +45,25 @@ public class CalculateService {
         return 0L;
     }
 
+    public String calculateLevel(User user) {
+
+        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
+        if(bowling.size() >= 10) {
+
+            Long result = calculateAverageScore(user);
+
+            if(result >=0 && result < 75) {
+                return "입문";
+            }else if(result >=75 && result < 150) {
+                return "초급";
+            }else if(result >=150 && result < 225) {
+                return "중급";
+            }else if(result >=225 && result <= 300) {
+                return "상급";
+            }
+        }
+        return "입문";
+    }
+
 }

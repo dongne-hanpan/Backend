@@ -1,6 +1,9 @@
 package com.sparta.project.controller;
 
-import com.sparta.project.dto.*;
+import com.sparta.project.dto.user.LoginRequestDto;
+import com.sparta.project.dto.user.LoginResponseDto;
+import com.sparta.project.dto.user.UserRequestDto;
+import com.sparta.project.model.User;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +38,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(authService.login(loginRequestDto));
         //로그인 실패시 에러반환 필요
+    }
+
+    @GetMapping("/logout")
+    public void logOut(@RequestHeader(value = "Authorization") String token) {
+        authService.logout(token);
     }
 
 //    @PostMapping("/reissue")

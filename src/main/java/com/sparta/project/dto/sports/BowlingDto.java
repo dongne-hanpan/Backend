@@ -1,4 +1,4 @@
-package com.sparta.project.dto;
+package com.sparta.project.dto.sports;
 
 import lombok.Getter;
 import lombok.Setter;

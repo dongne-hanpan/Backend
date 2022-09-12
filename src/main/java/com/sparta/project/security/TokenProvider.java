@@ -1,11 +1,10 @@
 package com.sparta.project.security;
 
 import com.sparta.project.dto.TokenDto;
-import com.sparta.project.repository.UserRepository;
+import com.sparta.project.dto.user.LoginResponseDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,9 +65,10 @@ public class TokenProvider {
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
-//                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
-//                .refreshToken(refreshToken)
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .refreshToken(refreshToken)
                 .build();
+
     }
 
     // token을 매개변수로 받아서, 토큰에 담긴 정보를 이용해 Authentication 객체를 리턴하는

@@ -17,7 +17,7 @@ public class ValidationService {
 
     public Match validate(Long match_id, String token) {
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("게시물이 존재하지 않습니다"));

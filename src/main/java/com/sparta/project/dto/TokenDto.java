@@ -1,21 +1,14 @@
 package com.sparta.project.dto;
 
-import com.sparta.project.model.User;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@Getter
 public class TokenDto {
 
     private String grantType;
     private String accessToken;
-//    private String refreshToken;
-//    private Long accessTokenExpiresIn;
-    private String username;
-    private String nickname;
-    private String profileImage;
-
+    private String refreshToken;
+    private long accessTokenExpiresIn;
 }

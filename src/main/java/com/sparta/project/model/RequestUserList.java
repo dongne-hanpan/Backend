@@ -1,6 +1,6 @@
 package com.sparta.project.model;
 
-import com.sparta.project.dto.InviteResponseDto;
+import com.sparta.project.dto.user.InviteResponseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

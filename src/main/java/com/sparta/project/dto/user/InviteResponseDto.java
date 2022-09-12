@@ -1,4 +1,4 @@
-package com.sparta.project.dto;
+package com.sparta.project.dto.user;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,5 +14,7 @@ public class InviteResponseDto {
     private double mannerPoint;
     private Long averageScore;
     private int matchCount;
+    private String userLevel;
     private Long match_id;
+    private String profileImage;
 }

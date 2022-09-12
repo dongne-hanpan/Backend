@@ -1,15 +1,12 @@
 package com.sparta.project.service;
 
-import antlr.Token;
-import com.sparta.project.dto.InviteRequestDto;
-import com.sparta.project.dto.InviteResponseDto;
-import com.sparta.project.dto.MatchDto;
+import com.sparta.project.dto.match.MatchRequestDto;
+import com.sparta.project.dto.user.InviteRequestDto;
+import com.sparta.project.dto.user.InviteResponseDto;
+import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.model.*;
 import com.sparta.project.repository.*;
-import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -30,39 +27,39 @@ public class MatchService {
     private final AuthService authService;
 
     //게시글 작성
-    public void createMatch(MatchDto matchDto, String token) {
+    public void createMatch(MatchRequestDto matchRequestDto, String token) {
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
-        matchDto.setWriter(user.getNickname());
+        matchRequestDto.setWriter(user.getNickname());
 
-        Match match = new Match(matchDto);
+        Match match = new Match(matchRequestDto);
         matchRepository.save(match);
 
         //작성자 본인을 match에 포함되도록 저장
-        UserListInMatch userListInMatch = new UserListInMatch();
-        userListInMatch.setUser(user);
-        userListInMatch.setMatch(match);
-        userLisInMatchRepository.save(userListInMatch);
+        userLisInMatchRepository.save(UserListInMatch.builder()
+                .user(user)
+                .match(match)
+                .build());
     }
 
     //게시글 수정
     @Transactional
-    public void updateMatch(Long match_id, MatchDto matchDto, String token) {
+    public void updateMatch(Long match_id, MatchRequestDto matchRequestDto, String token) {
 
         Match match = validationService.validate(match_id, token);
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         if (match.getWriter().equals(user.getNickname())) {
-            match.updateMatch(matchDto);
+            match.updateMatch(matchRequestDto);
         }
     }
 
     //match 입장 신청
-    public InviteResponseDto enterMatch(Long match_id, String token) {
+    public InviteResponseDto enterRequestMatch(Long match_id, String token) {
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         Match match = matchRepository.findById(match_id).orElseThrow();
 
@@ -89,7 +86,7 @@ public class MatchService {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         if (!user.getNickname().equals(match.getWriter())) {
             throw new IllegalArgumentException("권한이 없습니다");
@@ -113,27 +110,27 @@ public class MatchService {
 
     public List<InviteResponseDto> showRequestUserList(String token) {
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         List<Match> list = matchRepository.findAllByWriter(user.getNickname());
         List<InviteResponseDto> userList = new ArrayList<>();
 
-        if(list.size() != 0) {
+        if (list.size() != 0) {
             for (Match match : list) {
-                for(int i=0; i<requestUserListRepository.findAllByMatch(match).size(); i++) {
+                for (int i = 0; i < requestUserListRepository.findAllByMatch(match).size(); i++) {
                     user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
                     userList.add(InviteResponseDto.builder()
                             .match_id(match.getId())
                             .nickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname())
-                            .matchCount(bowlingRepository.findAllByUser(user).size())
-                            .averageScore(calculateService.calculateAverageScore(user))
+                            .userLevel(calculateService.calculateLevel(user))
                             .mannerPoint(calculateService.calculateMannerPoint(user))
+                            .profileImage(user.getProfileImage())
                             .build()
                     );
                 }
 
             }
-        }else {
+        } else {
             return null;
         }
         return userList;
@@ -144,7 +141,7 @@ public class MatchService {
     public void deleteMatch(Long match_id, String token) {
         Match match = validationService.validate(match_id, token);
         String writer = match.getWriter();
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         if (writer.equals(user.getNickname())) {
             matchRepository.deleteById(match_id);
@@ -152,6 +149,29 @@ public class MatchService {
             UserListInMatch userListInMatch = userLisInMatchRepository.findByMatchAndUser(match, user);
             userLisInMatchRepository.delete(userListInMatch);
         }
+    }
+
+    public List<MatchResponseDto> getMatchList(Long region, String sports) {
+        List<Match> matches = matchRepository.findAllByRegionAndSports(region, sports);
+        List<MatchResponseDto> list = new ArrayList<>();
+
+        for (Match match : matches) {
+            list.add(MatchResponseDto.builder()
+                    .writer(match.getWriter())
+                    .region(match.getRegion())
+                    .contents(match.getContents())
+                    .date(match.getDate())
+                    .time(match.getTime())
+                    .place(match.getPlace())
+                    .sports(match.getSports())
+                    .profileImage_HOST(null)
+                    .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
+                    .max_user(match.getMax_user())
+                    .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
+                    .build());
+        }
+        return list;
+
     }
 
 }

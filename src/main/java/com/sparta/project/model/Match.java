@@ -1,7 +1,7 @@
 package com.sparta.project.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sparta.project.dto.MatchDto;
+import com.sparta.project.dto.match.MatchRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,22 +21,20 @@ public class Match extends Timestamped{
     @Column(name = "match_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @Column
     private String writer;
-
     @Column
-    private String title;
-
+    private String date;
+    @Column
+    private String time;
+    @Column
+    private String place;
     @Column
     private String contents;
-
     @Column
     private Long region;
-
     @Column
     private String sports;
-
     @Column
     private Long max_user;
 
@@ -51,19 +49,23 @@ public class Match extends Timestamped{
     private List<UserListInMatch> userListInMatches;
 
     @Builder
-    public Match(MatchDto matchDto) {
-        this.writer = matchDto.getWriter();
-        this.title = matchDto.getTitle();
-        this.contents = matchDto.getContents();
-        this.region = matchDto.getRegion();
-        this.sports = matchDto.getSports();
-        this.max_user = matchDto.getMax_user();
+    public Match(MatchRequestDto matchRequestDto) {
+        this.writer = matchRequestDto.getWriter();
+        this.date = matchRequestDto.getDate();
+        this.time = matchRequestDto.getTime();
+        this.place = matchRequestDto.getPlace();
+        this.contents = matchRequestDto.getContents();
+        this.region = matchRequestDto.getRegion();
+        this.sports = matchRequestDto.getSports();
+        this.max_user = matchRequestDto.getMax_user();
     }
 
-    public void updateMatch(MatchDto matchDto) {
-        this.title = matchDto.getTitle();
-        this.contents = matchDto.getContents();
-        this.region = matchDto.getRegion();
-        this.sports = matchDto.getSports();
+    public void updateMatch(MatchRequestDto matchRequestDto) {
+        this.date = matchRequestDto.getDate();
+        this.time = matchRequestDto.getTime();
+        this.place = matchRequestDto.getPlace();
+        this.contents = matchRequestDto.getContents();
+        this.region = matchRequestDto.getRegion();
+        this.sports = matchRequestDto.getSports();
     }
 }

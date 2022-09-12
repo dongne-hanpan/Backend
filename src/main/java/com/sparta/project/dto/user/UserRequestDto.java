@@ -1,4 +1,4 @@
-package com.sparta.project.dto;
+package com.sparta.project.dto.user;
 
 import com.sparta.project.model.Authority;
 import com.sparta.project.model.User;

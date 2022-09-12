@@ -1,6 +1,10 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.*;
+import com.sparta.project.dto.TokenDto;
+import com.sparta.project.dto.user.LoginRequestDto;
+import com.sparta.project.dto.user.LoginResponseDto;
+import com.sparta.project.dto.user.UserRequestDto;
+import com.sparta.project.dto.user.UserResponseDto;
 import com.sparta.project.model.RefreshToken;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.RefreshTokenRepository;
@@ -22,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CalculateService calculateService;
 
     @Transactional
     public UserResponseDto signup(UserRequestDto userRequestDto) {
@@ -35,7 +40,7 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenDto login(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
 
         User user = userRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow();
 
@@ -45,20 +50,28 @@ public class AuthService {
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
-        RefreshToken refreshToken = RefreshToken.builder()
+        refreshTokenRepository.save(RefreshToken.builder()
                 .key(authentication.getName())
-//                .value(tokenDto.getRefreshToken())
+                .value(tokenDto.getRefreshToken())
+                .build());
+
+        return LoginResponseDto.builder()
+                .grantType(tokenDto.getGrantType())
+                .accessToken(tokenDto.getAccessToken())
+                .username(user.getUsername())
+                .nickname(user.getNickname())
+                .mannerPoint(calculateService.calculateMannerPoint(user))
+                .profileImage(null)
                 .build();
-
-        refreshTokenRepository.save(refreshToken);
-        tokenDto.setNickname(user.getNickname());
-        tokenDto.setUsername(user.getUsername());
-        tokenDto.setProfileImage(user.getProfileImage());
-
-        return tokenDto;
     }
 
-    public User getUserIdByToken(String token) {
+    @Transactional
+    public void logout(String token) {
+        User user = getUserByToken(token);
+        refreshTokenRepository.deleteByKey(user.getId().toString());
+    }
+
+    public User getUserByToken(String token) {
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
         return userRepository.findById(user_id).orElseThrow(() ->

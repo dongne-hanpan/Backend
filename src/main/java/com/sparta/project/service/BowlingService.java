@@ -1,16 +1,12 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.BowlingDto;
+import com.sparta.project.dto.sports.BowlingDto;
 import com.sparta.project.model.Bowling;
 import com.sparta.project.model.Match;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.BowlingRepository;
-import com.sparta.project.repository.UserRepository;
-import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +21,7 @@ public class BowlingService {
 
         Match match = validationService.validate(bowlingDto.getMatch_id(), token);
 
-        User user = authService.getUserIdByToken(token);
+        User user = authService.getUserByToken(token);
 
         if(!bowlingRepository.existsByUserAndMatch(user, match) && bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
             bowlingRepository.save(Bowling.builder()
