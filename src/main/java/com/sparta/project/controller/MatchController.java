@@ -46,7 +46,7 @@ public class MatchController {
     //입장신청
     @GetMapping("/enter/{match_id}")
     private InviteResponseDto enterMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
-        return matchService.enterRequestMatch(match_id, token);
+        return matchService.enterRequest(match_id, token);
     }
 
     //입장 수락 or 거절

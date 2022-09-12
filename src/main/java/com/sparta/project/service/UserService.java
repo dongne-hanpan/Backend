@@ -2,13 +2,10 @@ package com.sparta.project.service;
 
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
-import com.sparta.project.dto.user.UserResponseDto;
 import com.sparta.project.model.*;
 import com.sparta.project.repository.*;
-import com.sparta.project.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final UserLisInMatchRepository userLisInMatchRepository;
+    private final UserListInMatchRepository userListInMatchRepository;
     private final EvaluationRepository evaluationRepository;
     private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
@@ -29,7 +26,7 @@ public class UserService {
 
         User user = authService.getUserByToken(token);
 
-        List<UserListInMatch> list = userLisInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
+        List<UserListInMatch> list = userListInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
         for (UserListInMatch userListInMatch : list) {
             if (userListInMatch.getUser().getNickname().equals(evaluationDto.getNickname()) || userListInMatch.getUser().getUsername().equals(user.getUsername())) {
                 count++;
@@ -64,7 +61,7 @@ public class UserService {
         if (sports.equals("bowling")) {
             long sumScore = 0L;
             List<Match> list = new ArrayList<>();
-            for (UserListInMatch invitedUser : userLisInMatchRepository.findAllByUser(user)) {
+            for (UserListInMatch invitedUser : userListInMatchRepository.findAllByUser(user)) {
                 if (invitedUser.getMatch().getSports().equals(sports)) list.add(invitedUser.getMatch());
             }
 
@@ -81,7 +78,7 @@ public class UserService {
                     .mannerPoint(calculateService.calculateMannerPoint(user))
                     .matchCount(bowling.size())
                     .matchList(list)
-                    .profileImage("test")
+                    .profileImage(user.getProfileImage())
                     .score(totalAverage)
                     .build();
         }

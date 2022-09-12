@@ -18,7 +18,7 @@ import java.util.List;
 public class MatchService {
 
     private final MatchRepository matchRepository;
-    private final UserLisInMatchRepository userLisInMatchRepository;
+    private final UserListInMatchRepository userListInMatchRepository;
     private final UserRepository userRepository;
     private final CalculateService calculateService;
     private final BowlingRepository bowlingRepository;
@@ -37,7 +37,7 @@ public class MatchService {
         matchRepository.save(match);
 
         //작성자 본인을 match에 포함되도록 저장
-        userLisInMatchRepository.save(UserListInMatch.builder()
+        userListInMatchRepository.save(UserListInMatch.builder()
                 .user(user)
                 .match(match)
                 .build());
@@ -57,7 +57,7 @@ public class MatchService {
     }
 
     //match 입장 신청
-    public InviteResponseDto enterRequestMatch(Long match_id, String token) {
+    public InviteResponseDto enterRequest(Long match_id, String token) {
 
         User user = authService.getUserByToken(token);
 
@@ -96,7 +96,7 @@ public class MatchService {
         RequestUserList requestUserList = requestUserListRepository.findByNickname(user.getNickname());
 
         if (inviteRequestDto.isPermit()) {
-            userLisInMatchRepository.save(UserListInMatch.builder()
+            userListInMatchRepository.save(UserListInMatch.builder()
                     .match(match)
                     .user(user)
                     .build());
@@ -146,8 +146,8 @@ public class MatchService {
         if (writer.equals(user.getNickname())) {
             matchRepository.deleteById(match_id);
         } else {
-            UserListInMatch userListInMatch = userLisInMatchRepository.findByMatchAndUser(match, user);
-            userLisInMatchRepository.delete(userListInMatch);
+            UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
+            userListInMatchRepository.delete(userListInMatch);
         }
     }
 
@@ -164,9 +164,10 @@ public class MatchService {
                     .time(match.getTime())
                     .place(match.getPlace())
                     .sports(match.getSports())
-                    .profileImage_HOST(null)
+                    .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
                     .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
-                    .max_user(match.getMax_user())
+                    .matchIntakeFull(match.getMatchIntakeFull())
+                    .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
                     .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
                     .build());
         }

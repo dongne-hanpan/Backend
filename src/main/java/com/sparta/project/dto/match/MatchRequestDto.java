@@ -16,6 +16,6 @@ public class MatchRequestDto {
     private String contents;
     private Long region;
     private String sports;
-    private Long max_user;
+    private Long matchIntakeFull;
 
 }

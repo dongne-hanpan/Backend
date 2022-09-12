@@ -36,7 +36,7 @@ public class Match extends Timestamped{
     @Column
     private String sports;
     @Column
-    private Long max_user;
+    private Long matchIntakeFull;
 
     @JsonIgnore
     @OneToMany
@@ -57,7 +57,7 @@ public class Match extends Timestamped{
         this.contents = matchRequestDto.getContents();
         this.region = matchRequestDto.getRegion();
         this.sports = matchRequestDto.getSports();
-        this.max_user = matchRequestDto.getMax_user();
+        this.matchIntakeFull = matchRequestDto.getMatchIntakeFull();
     }
 
     public void updateMatch(MatchRequestDto matchRequestDto) {

@@ -14,7 +14,8 @@ public class MatchResponseDto {
     private String contents;
     private Long region;
     private String sports;
-    private Long max_user;
+    private Long matchIntakeCnt;
+    private Long matchIntakeFull;
     private String profileImage_HOST;
     private double mannerPoint_HOST;
     private String level_HOST;

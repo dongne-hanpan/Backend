@@ -6,7 +6,7 @@ import com.sparta.project.model.Message;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.repository.MessageRepository;
-import com.sparta.project.repository.UserLisInMatchRepository;
+import com.sparta.project.repository.UserListInMatchRepository;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class MessageService {
     private final TokenProvider tokenProvider;
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
-    private final UserLisInMatchRepository userLisInMatchRepository;
+    private final UserListInMatchRepository userListInMatchRepository;
     private final MessageRepository messageRepository;
     private final AuthService authService;
 
@@ -42,7 +42,7 @@ public class MessageService {
         Match match = matchRepository.findById(match_id).orElseThrow(()->
                 new IllegalArgumentException("존재하지 않는 Match"));
 
-        if (!userLisInMatchRepository.existsByMatchAndUser(match, user)) {
+        if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");
         }
 
@@ -60,7 +60,7 @@ public class MessageService {
         Match match = matchRepository.findById(match_id).orElseThrow();
         User user = authService.getUserByToken(token);
 
-        if (!userLisInMatchRepository.existsByMatchAndUser(match, user)) {
+        if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");
         }
 
