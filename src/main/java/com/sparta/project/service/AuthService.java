@@ -1,6 +1,6 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.TokenDto;
+import com.sparta.project.dto.token.TokenDto;
 import com.sparta.project.dto.user.LoginRequestDto;
 import com.sparta.project.dto.user.LoginResponseDto;
 import com.sparta.project.dto.user.UserRequestDto;

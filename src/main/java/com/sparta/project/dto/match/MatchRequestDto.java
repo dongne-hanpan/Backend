@@ -1,6 +1,5 @@
 package com.sparta.project.dto.match;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +12,11 @@ public class MatchRequestDto {
     private String date;
     private String time;
     private String place;
+    private String placeDetail;
     private String contents;
     private Long region;
     private String sports;
     private Long matchIntakeFull;
+    private String matchStatus;
 
 }

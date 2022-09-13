@@ -1,6 +1,6 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.ChatMessageDto;
+import com.sparta.project.dto.message.ChatMessageDto;
 import com.sparta.project.model.Match;
 import com.sparta.project.model.Message;
 import com.sparta.project.model.User;
@@ -55,10 +55,11 @@ public class MessageService {
         return chatMessageDto;
     }
 
-    public List<ChatMessageDto> showMessage(Long match_id, String token) {
+    public List<ChatMessageDto> showMessage(Long match_id) {
 
         Match match = matchRepository.findById(match_id).orElseThrow();
-        User user = authService.getUserByToken(token);
+//        User user = authService.getUserByToken(token);
+        User user = userRepository.findById(1L).orElseThrow();
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");

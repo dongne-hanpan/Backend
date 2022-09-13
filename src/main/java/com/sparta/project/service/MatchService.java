@@ -32,6 +32,7 @@ public class MatchService {
         User user = authService.getUserByToken(token);
 
         matchRequestDto.setWriter(user.getNickname());
+        matchRequestDto.setMatchStatus("recruit");
 
         Match match = new Match(matchRequestDto);
         matchRepository.save(match);
@@ -156,23 +157,42 @@ public class MatchService {
         List<MatchResponseDto> list = new ArrayList<>();
 
         for (Match match : matches) {
-            list.add(MatchResponseDto.builder()
-                    .writer(match.getWriter())
-                    .region(match.getRegion())
-                    .contents(match.getContents())
-                    .date(match.getDate())
-                    .time(match.getTime())
-                    .place(match.getPlace())
-                    .sports(match.getSports())
-                    .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
-                    .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
-                    .matchIntakeFull(match.getMatchIntakeFull())
-                    .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
-                    .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
-                    .build());
+            if (match.getMatchStatus().equals("recruit")) {
+                list.add(MatchResponseDto.builder()
+                        .match_id(match.getId())
+                        .writer(match.getWriter())
+                        .region(match.getRegion())
+                        .contents(match.getContents())
+                        .date(match.getDate())
+                        .time(match.getTime())
+                        .place(match.getPlace())
+                        .sports(match.getSports())
+                        .matchStatus(match.getMatchStatus())
+                        .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
+                        .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
+                        .matchIntakeFull(match.getMatchIntakeFull())
+                        .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
+                        .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
+                        .build());
+            }
         }
         return list;
 
     }
 
+    @Transactional
+    public String setMatchStatus(Long match_id, String token) {
+        Match match = matchRepository.findById(match_id).orElseThrow();
+        User user = authService.getUserByToken(token);
+
+        if (user.getNickname().equals(match.getWriter())) {
+            MatchRequestDto matchRequestDto = new MatchRequestDto();
+            matchRequestDto.setMatchStatus("done");
+            match.changeStatus(matchRequestDto);
+
+            return "매칭이 종료되었습니다";
+        } else {
+            return "권한이 없습니다";
+        }
+    }
 }

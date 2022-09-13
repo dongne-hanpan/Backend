@@ -1,5 +1,6 @@
 package com.sparta.project.service;
 
+import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
 import com.sparta.project.model.*;
@@ -60,15 +61,31 @@ public class UserService {
         // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
             long sumScore = 0L;
-            List<Match> list = new ArrayList<>();
+            List<MatchResponseDto> list = new ArrayList<>();
             for (UserListInMatch invitedUser : userListInMatchRepository.findAllByUser(user)) {
-                if (invitedUser.getMatch().getSports().equals(sports)) list.add(invitedUser.getMatch());
+                if (invitedUser.getMatch().getSports().equals(sports))
+                    list.add(MatchResponseDto.builder()
+                            .match_id(invitedUser.getMatch().getId())
+                            .matchIntakeCnt(userListInMatchRepository.countByMatch(invitedUser.getMatch()))
+                            .matchIntakeFull(invitedUser.getMatch().getMatchIntakeFull())
+                            .contents(invitedUser.getMatch().getContents())
+                            .date(invitedUser.getMatch().getDate())
+                            .time(invitedUser.getMatch().getTime())
+                            .place(invitedUser.getMatch().getPlace())
+                            .placeDetail(invitedUser.getMatch().getPlaceDetail())
+                            .region(invitedUser.getMatch().getRegion())
+                            .sports(invitedUser.getMatch().getSports())
+                            .writer(invitedUser.getMatch().getWriter())
+                            .level_HOST(calculateService.calculateLevel(user))
+                            .matchStatus(invitedUser.getMatch().getMatchStatus())
+                            .build());
+            }
+            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+            for (Bowling value : bowling) {
+                sumScore = sumScore + value.getMyScore();
             }
 
-            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
-            for (Bowling value : bowling) { sumScore = sumScore + value.getMyScore(); }
-
-            if(bowling.size() != 0) {
+            if (bowling.size() != 0) {
                 totalAverage = sumScore / bowling.size();
             }
 
@@ -84,7 +101,6 @@ public class UserService {
         }
         return null;
     }
-
 
 
 }

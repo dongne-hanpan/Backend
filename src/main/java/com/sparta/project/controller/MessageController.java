@@ -1,7 +1,7 @@
 package com.sparta.project.controller;
 
 
-import com.sparta.project.dto.ChatMessageDto;
+import com.sparta.project.dto.message.ChatMessageDto;
 import com.sparta.project.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -31,7 +31,7 @@ public class MessageController {
     //메세지 채팅방에 뿌려주기
     @ResponseBody
     @GetMapping("/chat/message/{match_id}")
-    public List<ChatMessageDto> showMessage(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
-        return messageService.showMessage(match_id, token);
+    public List<ChatMessageDto> showMessage(@PathVariable Long match_id) {
+        return messageService.showMessage(match_id);
     }
 }

@@ -1,5 +1,6 @@
 package com.sparta.project.dto.user;
 
+import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.model.Match;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,7 @@ public class MyPageResponseDto {
 
     private String nickname;
     private Long score;
-    private List<Match> matchList;
+    private List<MatchResponseDto> matchList;
     private String profileImage;
     private double mannerPoint;
     private int matchCount;

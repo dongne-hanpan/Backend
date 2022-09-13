@@ -30,6 +30,8 @@ public class Match extends Timestamped{
     @Column
     private String place;
     @Column
+    private String placeDetail;
+    @Column
     private String contents;
     @Column
     private Long region;
@@ -37,6 +39,9 @@ public class Match extends Timestamped{
     private String sports;
     @Column
     private Long matchIntakeFull;
+
+    @Column
+    private String matchStatus;
 
     @JsonIgnore
     @OneToMany
@@ -54,18 +59,25 @@ public class Match extends Timestamped{
         this.date = matchRequestDto.getDate();
         this.time = matchRequestDto.getTime();
         this.place = matchRequestDto.getPlace();
+        this.placeDetail = matchRequestDto.getPlaceDetail();
         this.contents = matchRequestDto.getContents();
         this.region = matchRequestDto.getRegion();
         this.sports = matchRequestDto.getSports();
         this.matchIntakeFull = matchRequestDto.getMatchIntakeFull();
+        this.matchStatus = matchRequestDto.getMatchStatus();
     }
 
     public void updateMatch(MatchRequestDto matchRequestDto) {
         this.date = matchRequestDto.getDate();
         this.time = matchRequestDto.getTime();
         this.place = matchRequestDto.getPlace();
+        this.placeDetail = matchRequestDto.getPlaceDetail();
         this.contents = matchRequestDto.getContents();
         this.region = matchRequestDto.getRegion();
         this.sports = matchRequestDto.getSports();
+    }
+
+    public void changeStatus(MatchRequestDto matchRequestDto) {
+            this.matchStatus = matchRequestDto.getMatchStatus();
     }
 }

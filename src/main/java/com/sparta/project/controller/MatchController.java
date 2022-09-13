@@ -60,4 +60,9 @@ public class MatchController {
     private List<InviteResponseDto> requestUserList(@RequestHeader(value = "Authorization") String token) {
         return matchService.showRequestUserList(token);
     }
+
+    @GetMapping("/matchstatus/{match_id}")
+    private String setMatchStatus(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return matchService.setMatchStatus(match_id, token);
+    }
 }

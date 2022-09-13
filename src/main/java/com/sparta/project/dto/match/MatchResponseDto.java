@@ -7,10 +7,12 @@ import lombok.Data;
 @Builder
 public class MatchResponseDto {
 
+    private Long match_id;
     private String writer;
     private String date;
     private String time;
     private String place;
+    private String placeDetail;
     private String contents;
     private Long region;
     private String sports;
@@ -19,4 +21,5 @@ public class MatchResponseDto {
     private String profileImage_HOST;
     private double mannerPoint_HOST;
     private String level_HOST;
+    private String matchStatus;
 }

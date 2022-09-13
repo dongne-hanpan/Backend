@@ -1,7 +1,6 @@
 package com.sparta.project.security;
 
-import com.sparta.project.dto.TokenDto;
-import com.sparta.project.dto.user.LoginResponseDto;
+import com.sparta.project.dto.token.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

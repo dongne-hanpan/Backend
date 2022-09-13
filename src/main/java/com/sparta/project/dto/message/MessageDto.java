@@ -1,4 +1,4 @@
-package com.sparta.project.dto;
+package com.sparta.project.dto.message;
 
 import com.sparta.project.model.Match;
 import com.sparta.project.model.User;
