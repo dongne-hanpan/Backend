@@ -117,7 +117,7 @@
 ## API 리스트
 
 API명세서는 Swagger를 통해 작성했습니다.
-http://54.197.65.103/swagger-ui.html
+http://3.38.191.6/swagger-ui.html
 
 ## 트러블 슈팅
 
