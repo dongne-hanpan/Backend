@@ -72,6 +72,7 @@
 - 유저가 모집글을 보고 신청을 하면 해당 매치의 호스트에게 알림이 가도록 하기
   - 신청버튼을 누를 시 Request_User_List Table에 User정보와 Match정보 그리고 입력한 Comment가 저장됨. 
   - Host계정 로그인시 상단 알림창에서 신청한 유저 정보 확인 가능
+  
   ![image](https://user-images.githubusercontent.com/86644517/190033452-56cec819-ca55-491f-bfed-78d6f0c81063.png)
   
 - 호스트는 신청한 유저의 정보와 Comment를 토대로 수락/거절 할 수 있음
