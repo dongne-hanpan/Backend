@@ -29,12 +29,9 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final AuthService authService;
 
-    public ChatMessageDto messageSender(ChatMessageDto chatMessageDto, Long match_id, String token) {
+    public void messageSender(ChatMessageDto chatMessageDto, Long match_id, String token) {
 
-        Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
-        Long userId = Long.parseLong(authentication.getName());
-
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = authService.getUserByToken(token);
 
         chatMessageDto.setSender(user.getNickname());
         chatMessageDto.setMatch_id(match_id);
@@ -51,14 +48,11 @@ public class MessageService {
                 .user(user)
                 .match(match)
                 .build());
-
-        return chatMessageDto;
     }
 
     public List<ChatMessageDto> showMessage(Long match_id) {
 
         Match match = matchRepository.findById(match_id).orElseThrow();
-//        User user = authService.getUserByToken(token);
         User user = userRepository.findById(1L).orElseThrow();
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {

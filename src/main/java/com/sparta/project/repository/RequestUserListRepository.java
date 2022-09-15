@@ -10,5 +10,6 @@ public interface RequestUserListRepository extends JpaRepository<RequestUserList
 
     RequestUserList findByNickname(String nickname);
     List<RequestUserList> findAllByMatch(Match match);
+    boolean existsByNicknameAndMatch(String nickname, Match match);
 
 }

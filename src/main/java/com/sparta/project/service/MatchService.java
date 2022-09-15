@@ -61,8 +61,16 @@ public class MatchService {
     public InviteResponseDto enterRequest(Long match_id, String token) {
 
         User user = authService.getUserByToken(token);
+        Match match = matchRepository.findById(match_id).orElseThrow(() ->
+                new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        Match match = matchRepository.findById(match_id).orElseThrow();
+        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
+            throw new IllegalArgumentException("이미 신청한 매치 입니다");
+        }
+
+        if(userListInMatchRepository.existsByMatchAndUser(match, user)) {
+            throw new IllegalArgumentException("이미 소속된 매치입니다");
+        }
 
         List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
@@ -152,6 +160,7 @@ public class MatchService {
         }
     }
 
+    //MatchService
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
         List<Match> matches = matchRepository.findAllByRegionAndSports(region, sports);
         List<MatchResponseDto> list = new ArrayList<>();

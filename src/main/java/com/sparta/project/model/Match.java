@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "matches")
 @Entity
 @NoArgsConstructor
-public class Match extends Timestamped{
+public class Match extends Timestamped {
 
     @Id
     @Column(name = "match_id")
@@ -39,11 +39,10 @@ public class Match extends Timestamped{
     private String sports;
     @Column
     private Long matchIntakeFull;
-
     @Column
     private String matchStatus;
 
-    @JsonIgnore
+//    @JsonIgnore
     @OneToMany
     @JoinColumn(name = "match_id")
     private List<RequestUserList> requestUserList;
@@ -78,6 +77,6 @@ public class Match extends Timestamped{
     }
 
     public void changeStatus(MatchRequestDto matchRequestDto) {
-            this.matchStatus = matchRequestDto.getMatchStatus();
+        this.matchStatus = matchRequestDto.getMatchStatus();
     }
 }
