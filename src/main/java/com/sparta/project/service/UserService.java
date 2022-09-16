@@ -1,6 +1,7 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.match.MatchResponseDto;
+import com.sparta.project.dto.message.MessageResponseDto;
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
 import com.sparta.project.model.*;
@@ -20,6 +21,8 @@ public class UserService {
     private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
     private final AuthService authService;
+    private final MatchRepository matchRepository;
+    private final MessageRepository messageRepository;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
@@ -102,5 +105,24 @@ public class UserService {
         return null;
     }
 
+    public List<MessageResponseDto> myChatList(String token) {
 
+        User user = authService.getUserByToken(token);
+
+        List<Match> matches = matchRepository.findAllByWriter(user.getNickname());
+        List<MessageResponseDto> list = new ArrayList<>();
+
+        for (Match match : matches) {
+            if (!match.getMatchStatus().equals("done")) {
+                list.add(MessageResponseDto.builder()
+                        .chatId(match.getId())
+                        .profileImage(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getUser().getProfileImage())
+                        .nickname(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getUser().getNickname())
+                        .lastContent(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getMessage())
+                        .build());
+                return list;
+            }
+        }
+        return list;
+    }
 }

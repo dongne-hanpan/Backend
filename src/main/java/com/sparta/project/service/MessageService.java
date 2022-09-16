@@ -22,8 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final TokenProvider tokenProvider;
-    private final UserRepository userRepository;
     private final MatchRepository matchRepository;
     private final UserListInMatchRepository userListInMatchRepository;
     private final MessageRepository messageRepository;
@@ -50,10 +48,10 @@ public class MessageService {
                 .build());
     }
 
-    public List<ChatMessageDto> showMessage(Long match_id) {
+    public List<ChatMessageDto> showMessage(Long match_id, String token) {
 
         Match match = matchRepository.findById(match_id).orElseThrow();
-        User user = userRepository.findById(1L).orElseThrow();
+        User user = authService.getUserByToken(token);
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");

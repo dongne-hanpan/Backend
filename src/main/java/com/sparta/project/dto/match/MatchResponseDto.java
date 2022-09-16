@@ -1,10 +1,13 @@
 package com.sparta.project.dto.match;
 
+import com.sparta.project.model.UserListInMatch;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+import java.util.List;
+
 @Builder
+@Getter
 public class MatchResponseDto {
 
     private Long match_id;
@@ -22,4 +25,5 @@ public class MatchResponseDto {
     private double mannerPoint_HOST;
     private String level_HOST;
     private String matchStatus;
+    private List<UserListInMatchDto> userListInMatch;
 }

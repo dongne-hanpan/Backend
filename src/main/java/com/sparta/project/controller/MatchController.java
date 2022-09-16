@@ -65,4 +65,9 @@ public class MatchController {
     private String setMatchStatus(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.setMatchStatus(match_id, token);
     }
+
+    @GetMapping("/chatroom/{match_id}")
+    private MatchResponseDto showChatRoomData(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return matchService.chatRoomResponse(match_id, token);
+    }
 }

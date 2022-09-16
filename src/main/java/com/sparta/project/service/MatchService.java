@@ -1,6 +1,7 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.match.MatchRequestDto;
+import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.user.InviteRequestDto;
 import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.dto.match.MatchResponseDto;
@@ -64,11 +65,11 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
-            throw new IllegalArgumentException("이미 신청한 매치 입니다");
-        }
+//        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
+//            throw new IllegalArgumentException("이미 신청한 매치 입니다");
+//        }
 
-        if(userListInMatchRepository.existsByMatchAndUser(match, user)) {
+        if (userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("이미 소속된 매치입니다");
         }
 
@@ -81,11 +82,16 @@ public class MatchService {
                 .matchCount(bowling.size())
                 .nickname(user.getNickname())
                 .build();
+//
+//        RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
+//
+//        requestUserList.setMatch(match);
+//        requestUserListRepository.save(requestUserList);
 
-        RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
-
-        requestUserList.setMatch(match);
-        requestUserListRepository.save(requestUserList);
+        userListInMatchRepository.save(UserListInMatch.builder()
+                .user(user)
+                .match(match)
+                .build());
 
         return inviteResponseDto;
     }
@@ -160,7 +166,6 @@ public class MatchService {
         }
     }
 
-    //MatchService
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
         List<Match> matches = matchRepository.findAllByRegionAndSports(region, sports);
         List<MatchResponseDto> list = new ArrayList<>();
@@ -191,7 +196,7 @@ public class MatchService {
 
     @Transactional
     public String setMatchStatus(Long match_id, String token) {
-        Match match = matchRepository.findById(match_id).orElseThrow();
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
         User user = authService.getUserByToken(token);
 
         if (user.getNickname().equals(match.getWriter())) {
@@ -204,4 +209,39 @@ public class MatchService {
             return "권한이 없습니다";
         }
     }
+
+    public MatchResponseDto chatRoomResponse(Long match_id, String token) {
+
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
+        User user = authService.getUserByToken(token);
+
+        if(!userListInMatchRepository.existsByMatchAndUser(match, user)) {
+            throw new IllegalArgumentException("초대되지 않은 매치입니다.");
+        }
+
+        List<UserListInMatchDto> list = new ArrayList<>();
+
+        for (UserListInMatch userListInMatch : userListInMatchRepository.findAllByMatchId(match_id)) {
+            list.add(UserListInMatchDto.builder()
+                    .nickname(userListInMatch.getUser().getNickname())
+                    .profileImage(userListInMatch.getUser().getProfileImage())
+                    .build());
+        }
+
+        return MatchResponseDto.builder()
+                .match_id(match_id)
+                .matchStatus(match.getMatchStatus())
+                .date(match.getDate())
+                .time(match.getTime())
+                .place(match.getPlace())
+                .writer(match.getWriter())
+                .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
+                .matchIntakeFull(match.getMatchIntakeFull())
+                .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
+                .userListInMatch(list)
+                .build();
+
+    }
+
+
 }

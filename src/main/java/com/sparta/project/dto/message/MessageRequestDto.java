@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MessageDto {
+public class MessageRequestDto {
 
     private String message;
     private Match match;

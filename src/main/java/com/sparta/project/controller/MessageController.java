@@ -31,7 +31,7 @@ public class MessageController {
     //메세지 채팅방에 뿌려주기
     @ResponseBody
     @GetMapping("/chat/message/{match_id}")
-    public List<ChatMessageDto> showMessage(@PathVariable Long match_id) {
-        return messageService.showMessage(match_id);
+    public List<ChatMessageDto> showMessage(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return messageService.showMessage(match_id, token);
     }
 }

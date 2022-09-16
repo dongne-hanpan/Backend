@@ -78,6 +78,18 @@ public class AuthService {
                 new IllegalArgumentException("유저 정보가 없습니다."));
     }
 
+    public LoginResponseDto refreshUserInfo(String token) {
+
+        User user = getUserByToken(token);
+
+        return LoginResponseDto.builder()
+                .username(user.getUsername())
+                .profileImage(user.getProfileImage())
+                .mannerPoint(calculateService.calculateMannerPoint(user))
+                .nickname(user.getNickname())
+                .build();
+    }
+
 //    @Transactional
 //    public TokenDto reissue(TokenRequestDto tokenRequestDto) {
 //        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {

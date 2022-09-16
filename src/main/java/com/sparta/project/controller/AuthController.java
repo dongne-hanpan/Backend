@@ -6,6 +6,7 @@ import com.sparta.project.dto.user.UserRequestDto;
 import com.sparta.project.model.User;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.service.AuthService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,4 +53,9 @@ public class AuthController {
 //    public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
 //        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
 //    }
+
+    @GetMapping("/refresh")
+    public LoginResponseDto refreshUserInfo(@RequestHeader(value = "Authorization") String token) {
+        return authService.refreshUserInfo(token);
+    }
 }
