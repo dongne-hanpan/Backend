@@ -8,7 +8,10 @@ import com.sparta.project.model.*;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +26,7 @@ public class UserService {
     private final AuthService authService;
     private final MatchRepository matchRepository;
     private final MessageRepository messageRepository;
+    private final AwsS3Service awsS3Service;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
@@ -124,5 +128,16 @@ public class UserService {
             }
         }
         return list;
+    }
+
+    @Transactional
+    public String uploadProfileImage(MultipartFile multipartFile, String token) throws IOException {
+
+        String imageUrl = awsS3Service.saveImageUrl(multipartFile);
+
+        User user = authService.getUserByToken(token);
+        user.uploadImage(imageUrl);
+
+        return imageUrl;
     }
 }

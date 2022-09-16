@@ -40,4 +40,7 @@ public class User {
         this.nickname = nickname;
         this.authority = authority;
     }
+    public void uploadImage(String url) {
+        this.profileImage = url;
+    }
 }

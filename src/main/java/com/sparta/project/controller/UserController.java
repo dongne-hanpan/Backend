@@ -9,7 +9,9 @@ import com.sparta.project.service.AuthService;
 import com.sparta.project.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -34,4 +36,11 @@ public class UserController {
     private List<MessageResponseDto> myChatList(@RequestHeader(value = "Authorization") String token) {
         return userService.myChatList(token);
     }
+
+    @PostMapping("/upload-image")
+    private String uploadProfileImage(@RequestParam("image") MultipartFile multipartFile,
+                                      @RequestHeader(value = "Authorization") String token) throws IOException {
+        return userService.uploadProfileImage(multipartFile, token);
+    }
+
 }
