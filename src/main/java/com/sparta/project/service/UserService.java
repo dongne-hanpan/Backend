@@ -1,6 +1,7 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.match.MatchResponseDto;
+import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.message.MessageResponseDto;
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
@@ -70,6 +71,15 @@ public class UserService {
             long sumScore = 0L;
             List<MatchResponseDto> list = new ArrayList<>();
             for (UserListInMatch invitedUser : userListInMatchRepository.findAllByUser(user)) {
+
+                List<UserListInMatchDto> userList = new ArrayList<>();
+
+                for (UserListInMatch userListInMatch : userListInMatchRepository.findAllByMatchId(invitedUser.getMatch().getId())) {
+                    userList.add(UserListInMatchDto.builder()
+                            .nickname(userListInMatch.getUser().getNickname())
+                            .build());
+                }
+
                 if (invitedUser.getMatch().getSports().equals(sports))
                     list.add(MatchResponseDto.builder()
                             .match_id(invitedUser.getMatch().getId())
@@ -85,6 +95,7 @@ public class UserService {
                             .writer(invitedUser.getMatch().getWriter())
                             .level_HOST(calculateService.calculateLevel(user))
                             .matchStatus(invitedUser.getMatch().getMatchStatus())
+                            .userListInMatch(userList)
                             .build());
             }
             List<Bowling> bowling = bowlingRepository.findAllByUser(user);
@@ -113,21 +124,29 @@ public class UserService {
 
         User user = authService.getUserByToken(token);
 
-        List<Match> matches = matchRepository.findAllByWriter(user.getNickname());
+        List<UserListInMatch> matches = userListInMatchRepository.findAllByUser(user);
+
         List<MessageResponseDto> list = new ArrayList<>();
 
-        for (Match match : matches) {
-            if (!match.getMatchStatus().equals("done")) {
-                list.add(MessageResponseDto.builder()
-                        .chatId(match.getId())
-                        .profileImage(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getUser().getProfileImage())
-                        .nickname(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getUser().getNickname())
-                        .lastContent(messageRepository.findTopByMatchOrderByCreatedAtDesc(match).getMessage())
-                        .build());
-                return list;
+        try {
+            for (UserListInMatch match : matches) {
+                System.out.println(matches.size());
+                if (!match.getMatch().getMatchStatus().equals("done")) {
+                    list.add(MessageResponseDto.builder()
+                            .chatId(match.getMatch().getId())
+//                            .profileImage(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getUser().getProfileImage())
+//                            .nickname(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getUser().getNickname())
+//                            .lastContent(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getMessage())
+                            .build());
+                }
             }
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
         }
-        return list;
+
+
     }
 
     @Transactional

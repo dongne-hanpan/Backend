@@ -1,11 +1,11 @@
 package com.sparta.project.dto.message;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Builder;
 import lombok.Getter;
 
+
 @Builder
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@Getter
 public class MessageResponseDto {
 
     private Long chatId;

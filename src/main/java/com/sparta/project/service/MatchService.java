@@ -143,7 +143,6 @@ public class MatchService {
                             .build()
                     );
                 }
-
             }
         } else {
             return null;
@@ -171,6 +170,15 @@ public class MatchService {
         List<MatchResponseDto> list = new ArrayList<>();
 
         for (Match match : matches) {
+
+            List<UserListInMatchDto> userList = new ArrayList<>();
+
+            for (UserListInMatch userListInMatch : userListInMatchRepository.findAllByMatchId(match.getId())) {
+                userList.add(UserListInMatchDto.builder()
+                        .nickname(userListInMatch.getUser().getNickname())
+                        .build());
+            }
+
             if (match.getMatchStatus().equals("recruit")) {
                 list.add(MatchResponseDto.builder()
                         .match_id(match.getId())
@@ -180,6 +188,7 @@ public class MatchService {
                         .date(match.getDate())
                         .time(match.getTime())
                         .place(match.getPlace())
+                        .placeDetail(match.getPlaceDetail())
                         .sports(match.getSports())
                         .matchStatus(match.getMatchStatus())
                         .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
@@ -187,6 +196,7 @@ public class MatchService {
                         .matchIntakeFull(match.getMatchIntakeFull())
                         .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
                         .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
+                        .userListInMatch(userList)
                         .build());
             }
         }
@@ -215,7 +225,7 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
         User user = authService.getUserByToken(token);
 
-        if(!userListInMatchRepository.existsByMatchAndUser(match, user)) {
+        if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대되지 않은 매치입니다.");
         }
 
