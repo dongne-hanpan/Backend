@@ -1,4 +1,4 @@
-package com.sparta.project.model;
+package com.sparta.project.entity;
 
 public enum Authority {
     ROLE_USER,

@@ -1,17 +1,14 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.message.ChatMessageDto;
-import com.sparta.project.model.Match;
-import com.sparta.project.model.Message;
-import com.sparta.project.model.User;
+import com.sparta.project.entity.Match;
+import com.sparta.project.entity.Message;
+import com.sparta.project.entity.User;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.repository.MessageRepository;
 import com.sparta.project.repository.UserListInMatchRepository;
-import com.sparta.project.repository.UserRepository;
-import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

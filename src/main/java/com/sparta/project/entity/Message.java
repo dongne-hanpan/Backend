@@ -1,21 +1,25 @@
-package com.sparta.project.model;
+package com.sparta.project.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@Getter
-@Setter
+@Builder
 @NoArgsConstructor
-public class UserListInMatch {
+@AllArgsConstructor
+@Getter
+public class Message extends Timestamped {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+
+    @Column
+    private String message;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -25,9 +29,4 @@ public class UserListInMatch {
     @JoinColumn(name = "match_id")
     private Match match;
 
-    @Builder
-    public UserListInMatch(User user, Match match) {
-        this.user = user;
-        this.match = match;
-    }
 }

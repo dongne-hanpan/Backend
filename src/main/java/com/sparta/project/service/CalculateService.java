@@ -1,8 +1,8 @@
 package com.sparta.project.service;
 
-import com.sparta.project.model.Bowling;
-import com.sparta.project.model.Evaluation;
-import com.sparta.project.model.User;
+import com.sparta.project.entity.Bowling;
+import com.sparta.project.entity.Evaluation;
+import com.sparta.project.entity.User;
 import com.sparta.project.repository.BowlingRepository;
 import com.sparta.project.repository.EvaluationRepository;
 import lombok.RequiredArgsConstructor;

@@ -5,7 +5,7 @@ import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.user.InviteRequestDto;
 import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.dto.match.MatchResponseDto;
-import com.sparta.project.model.*;
+import com.sparta.project.entity.*;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.sparta.project.dto.user;
 
-import com.sparta.project.model.User;
+import com.sparta.project.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

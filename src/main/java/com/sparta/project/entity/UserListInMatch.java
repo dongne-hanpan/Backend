@@ -1,25 +1,21 @@
-package com.sparta.project.model;
+package com.sparta.project.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
-public class Bowling {
+@Setter
+@NoArgsConstructor
+public class UserListInMatch {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-
-    @Column
-    private Long myScore;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -28,4 +24,10 @@ public class Bowling {
     @ManyToOne
     @JoinColumn(name = "match_id")
     private Match match;
+
+    @Builder
+    public UserListInMatch(User user, Match match) {
+        this.user = user;
+        this.match = match;
+    }
 }

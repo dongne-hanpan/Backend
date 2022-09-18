@@ -1,9 +1,9 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.sports.BowlingDto;
-import com.sparta.project.model.Bowling;
-import com.sparta.project.model.Match;
-import com.sparta.project.model.User;
+import com.sparta.project.entity.Bowling;
+import com.sparta.project.entity.Match;
+import com.sparta.project.entity.User;
 import com.sparta.project.repository.BowlingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

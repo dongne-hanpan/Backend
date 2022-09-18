@@ -1,11 +1,10 @@
 package com.sparta.project.dto.user;
 
-import com.sparta.project.model.Authority;
-import com.sparta.project.model.User;
+import com.sparta.project.entity.Authority;
+import com.sparta.project.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.NotBlank;

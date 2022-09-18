@@ -1,4 +1,4 @@
-package com.sparta.project.model;
+package com.sparta.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.project.dto.match.MatchRequestDto;

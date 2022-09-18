@@ -1,6 +1,5 @@
 package com.sparta.project.dto.match;
 
-import com.sparta.project.model.UserListInMatch;
 import lombok.Builder;
 import lombok.Getter;
 

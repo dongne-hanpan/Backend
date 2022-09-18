@@ -1,6 +1,6 @@
 package com.sparta.project.repository;
 
-import com.sparta.project.model.RefreshToken;
+import com.sparta.project.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

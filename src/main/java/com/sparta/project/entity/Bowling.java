@@ -1,4 +1,4 @@
-package com.sparta.project.model;
+package com.sparta.project.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,18 +8,18 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
-public class Message extends Timestamped {
+public class Bowling {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
 
     @Column
-    private String message;
+    private Long myScore;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -28,5 +28,4 @@ public class Message extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "match_id")
     private Match match;
-
 }

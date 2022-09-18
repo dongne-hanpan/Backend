@@ -1,7 +1,7 @@
 package com.sparta.project.service;
 
-import com.sparta.project.model.Match;
-import com.sparta.project.model.User;
+import com.sparta.project.entity.Match;
+import com.sparta.project.entity.User;
 import com.sparta.project.repository.MatchRepository;
 import com.sparta.project.repository.UserListInMatchRepository;
 import lombok.RequiredArgsConstructor;
