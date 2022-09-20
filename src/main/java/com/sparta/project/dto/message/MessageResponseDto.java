@@ -10,7 +10,9 @@ public class MessageResponseDto {
 
     private Long chatId;
     private String profileImage;
-    private String nickname;
-    private String lastContent;
+    private String hostNickname;
+    private String date;
+    private String time;
+    private String place;
 
 }

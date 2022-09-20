@@ -26,6 +26,7 @@ public class MatchService {
     private final RequestUserListRepository requestUserListRepository;
     private final ValidationService validationService;
     private final AuthService authService;
+    private final MessageRepository messageRepository;
 
     //게시글 작성
     public void createMatch(MatchRequestDto matchRequestDto, String token) {
@@ -65,9 +66,9 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-//        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
-//            throw new IllegalArgumentException("이미 신청한 매치 입니다");
-//        }
+        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
+            throw new IllegalArgumentException("이미 신청한 매치 입니다");
+        }
 
         if (userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("이미 소속된 매치입니다");
@@ -81,17 +82,19 @@ public class MatchService {
                 .match_id(match_id)
                 .matchCount(bowling.size())
                 .nickname(user.getNickname())
+                .userLevel(calculateService.calculateLevel(user))
+                .profileImage(user.getProfileImage())
                 .build();
-//
-//        RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
-//
-//        requestUserList.setMatch(match);
-//        requestUserListRepository.save(requestUserList);
 
-        userListInMatchRepository.save(UserListInMatch.builder()
-                .user(user)
-                .match(match)
-                .build());
+        RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
+
+        requestUserList.setMatch(match);
+        requestUserListRepository.save(requestUserList);
+
+//        userListInMatchRepository.save(UserListInMatch.builder()
+//                .user(user)
+//                .match(match)
+//                .build());
 
         return inviteResponseDto;
     }
@@ -128,6 +131,7 @@ public class MatchService {
         User user = authService.getUserByToken(token);
 
         List<Match> list = matchRepository.findAllByWriter(user.getNickname());
+
         List<InviteResponseDto> userList = new ArrayList<>();
 
         if (list.size() != 0) {
@@ -158,6 +162,8 @@ public class MatchService {
         User user = authService.getUserByToken(token);
 
         if (writer.equals(user.getNickname())) {
+
+            messageRepository.deleteByMatch(match); // 자식 객체를 먼저 삭제하기 위해 추가
             matchRepository.deleteById(match_id);
         } else {
             UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
@@ -166,6 +172,7 @@ public class MatchService {
     }
 
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
+
         List<Match> matches = matchRepository.findAllByRegionAndSports(region, sports);
         List<MatchResponseDto> list = new ArrayList<>();
 

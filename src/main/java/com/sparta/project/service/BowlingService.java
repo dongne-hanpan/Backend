@@ -23,7 +23,7 @@ public class BowlingService {
 
         User user = authService.getUserByToken(token);
 
-        if(!bowlingRepository.existsByUserAndMatch(user, match) && bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
+        if(bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
             bowlingRepository.save(Bowling.builder()
                     .myScore(bowlingDto.getMyScore())
                     .user(user)

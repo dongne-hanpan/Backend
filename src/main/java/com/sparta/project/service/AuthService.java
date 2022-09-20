@@ -30,6 +30,7 @@ public class AuthService {
 
     @Transactional
     public UserResponseDto signup(UserRequestDto userRequestDto) {
+
         if (userRepository.existsByUsername(userRequestDto.getUsername())) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다");
         }

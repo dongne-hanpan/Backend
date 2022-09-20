@@ -57,7 +57,6 @@ public class UserService {
 
     public MyPageResponseDto myPage(String sports, String token) {
         User user = authService.getUserByToken(token);
-        long totalAverage = 0;
 
         List<String> comment = new ArrayList<>();
 
@@ -68,7 +67,6 @@ public class UserService {
 
         // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
-            long sumScore = 0L;
             List<MatchResponseDto> list = new ArrayList<>();
             for (UserListInMatch invitedUser : userListInMatchRepository.findAllByUser(user)) {
 
@@ -99,13 +97,6 @@ public class UserService {
                             .build());
             }
             List<Bowling> bowling = bowlingRepository.findAllByUser(user);
-            for (Bowling value : bowling) {
-                sumScore = sumScore + value.getMyScore();
-            }
-
-            if (bowling.size() != 0) {
-                totalAverage = sumScore / bowling.size();
-            }
 
             return MyPageResponseDto.builder()
                     .comment(comment)
@@ -114,7 +105,8 @@ public class UserService {
                     .matchCount(bowling.size())
                     .matchList(list)
                     .profileImage(user.getProfileImage())
-                    .score(totalAverage)
+                    .score(calculateService.calculateAverageScore(user))
+                    .level(calculateService.calculateLevel(user))
                     .build();
         }
         return null;
@@ -130,13 +122,14 @@ public class UserService {
 
         try {
             for (UserListInMatch match : matches) {
-                System.out.println(matches.size());
                 if (!match.getMatch().getMatchStatus().equals("done")) {
                     list.add(MessageResponseDto.builder()
                             .chatId(match.getMatch().getId())
-//                            .profileImage(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getUser().getProfileImage())
-//                            .nickname(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getUser().getNickname())
-//                            .lastContent(messageRepository.findFirstByMatchOrderByCreatedAtDesc(match.getMatch()).getMessage())
+                            .profileImage(userRepository.findByNickname(match.getMatch().getWriter()).getProfileImage())
+                            .hostNickname(userRepository.findByNickname(match.getMatch().getWriter()).getNickname())
+                            .date(match.getMatch().getDate())
+                            .time(match.getMatch().getTime())
+                            .place(match.getMatch().getPlace())
                             .build());
                 }
             }
@@ -155,6 +148,7 @@ public class UserService {
         String imageUrl = awsS3Service.saveImageUrl(multipartFile);
 
         User user = authService.getUserByToken(token);
+
         user.uploadImage(imageUrl);
 
         return imageUrl;

@@ -54,14 +54,14 @@ public class MessageService {
             throw new IllegalArgumentException("초대가 되지않은 채팅방");
         }
 
-        List<Message> message = messageRepository.findAllByMatchOrderByCreatedAt(match);
+        List<Message> messages = messageRepository.findAllByMatchOrderByCreatedAt(match);
         List<ChatMessageDto> messageList = new ArrayList<>();
 
-        for (Message value : message) {
+        for (Message message : messages) {
             messageList.add(ChatMessageDto.builder()
-                    .message(value.getMessage())
+                    .message(message.getMessage())
                     .match_id(match_id)
-                    .sender(value.getUser().getNickname())
+                    .sender(message.getUser().getNickname())
                     .build()
             );
         }

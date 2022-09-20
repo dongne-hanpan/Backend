@@ -39,7 +39,7 @@ public class MatchController {
     }
 
     @DeleteMapping("/delete/{match_id}")
-    private void deleteMatch_Host(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+    private void deleteMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         matchService.deleteMatch(match_id, token);
     }
 

@@ -19,4 +19,5 @@ public class  MyPageResponseDto {
     private double mannerPoint;
     private int matchCount;
     private List<String> comment;
+    private String level;
 }
