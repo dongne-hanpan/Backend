@@ -31,11 +31,11 @@ public class MessageService {
         chatMessageDto.setSender(user.getNickname());
         chatMessageDto.setMatch_id(match_id);
 
-        Match match = matchRepository.findById(match_id).orElseThrow(()->
-                new IllegalArgumentException("존재하지 않는 Match"));
+        Match match = matchRepository.findById(match_id).orElseThrow(() ->
+                new IllegalArgumentException("매치가 존재하지 않습니다."));
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
-            throw new IllegalArgumentException("초대가 되지않은 채팅방");
+            throw new IllegalArgumentException("초대 되지않은 매치입니다.");
         }
 
         messageRepository.save(Message.builder()
@@ -51,7 +51,7 @@ public class MessageService {
         User user = authService.getUserByToken(token);
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
-            throw new IllegalArgumentException("초대가 되지않은 채팅방");
+            throw new IllegalArgumentException("초대 되지않은 매치입니다.");
         }
 
         List<Message> messages = messageRepository.findAllByMatchOrderByCreatedAt(match);
@@ -62,11 +62,12 @@ public class MessageService {
                     .message(message.getMessage())
                     .match_id(match_id)
                     .sender(message.getUser().getNickname())
+                    .createdAt(message.getCreatedAt())
                     .build()
             );
         }
 
-    return messageList;
+        return messageList;
     }
 
 }

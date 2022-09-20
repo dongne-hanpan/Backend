@@ -35,6 +35,7 @@ public class UserService {
 
         User user = authService.getUserByToken(token);
 
+
         List<UserListInMatch> list = userListInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
         for (UserListInMatch userListInMatch : list) {
             if (userListInMatch.getUser().getNickname().equals(evaluationDto.getNickname()) || userListInMatch.getUser().getUsername().equals(user.getUsername())) {
@@ -50,6 +51,8 @@ public class UserService {
                     .match_id(evaluationDto.getMatch_id())
                     .build());
 
+        } else {
+            throw new IllegalArgumentException("평가할 권한이 없습니다.");
         }
         count = 0;
 

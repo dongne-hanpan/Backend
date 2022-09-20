@@ -19,9 +19,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/comment")
-    private String evaluateUser(@RequestBody EvaluationDto evaluationDto, @RequestHeader(value = "Authorization") String token) {
+    private void evaluateUser(@RequestBody EvaluationDto evaluationDto, @RequestHeader(value = "Authorization") String token) {
         userService.evaluateUser(evaluationDto, token);
-        return "평가완료";
     }
 
     @GetMapping("/mypage/{sports}")

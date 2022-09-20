@@ -31,10 +31,11 @@ public class RequestUserList {
     @JoinColumn(name = "match_id")
     private Match match;
 
-    public RequestUserList(InviteResponseDto inviteResponseDto) {
+    public RequestUserList(InviteResponseDto inviteResponseDto, Match match) {
         this.nickname = inviteResponseDto.getNickname();
         this.averageScore = inviteResponseDto.getAverageScore();
         this.mannerPoint = inviteResponseDto.getMannerPoint();
+        this.match = match;
     }
 
 }

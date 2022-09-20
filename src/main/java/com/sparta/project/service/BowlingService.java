@@ -20,8 +20,11 @@ public class BowlingService {
     public Long inputMyScore(BowlingDto bowlingDto, String token) {
 
         Match match = validationService.validate(bowlingDto.getMatch_id(), token);
-
         User user = authService.getUserByToken(token);
+
+        if(match.getMatchStatus().equals("recruit")) {
+            throw new IllegalArgumentException("경기가 종료되지 않았습니다. 종료 후 입력해주세요.");
+        }
 
         if(bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
             bowlingRepository.save(Bowling.builder()

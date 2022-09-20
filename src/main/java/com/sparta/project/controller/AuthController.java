@@ -17,13 +17,8 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @PostMapping("/signup")
-    public String signup(@RequestBody UserRequestDto userRequestDto) {
-        try {
-            ResponseEntity.ok(authService.signup(userRequestDto));
-            return "회원가입 완료";
-        }catch (Exception e) {
-            return "회원가입 실패";
-        }
+    public void signup(@RequestBody UserRequestDto userRequestDto) {
+        ResponseEntity.ok(authService.signup(userRequestDto));
     }
 
     @GetMapping("/username/{username}")
@@ -39,7 +34,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(authService.login(loginRequestDto));
-        //로그인 실패시 에러반환 필요
     }
 
     @GetMapping("/logout")

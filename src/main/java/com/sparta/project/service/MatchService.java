@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +30,7 @@ public class MatchService {
     private final MessageRepository messageRepository;
 
     //게시글 작성
-    public void createMatch(MatchRequestDto matchRequestDto, String token) {
+    public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
 
         User user = authService.getUserByToken(token);
 
@@ -44,6 +45,9 @@ public class MatchService {
                 .user(user)
                 .match(match)
                 .build());
+
+        return getMatchList(matchRequestDto.getRegion(), matchRequestDto.getSports());
+
     }
 
     //게시글 수정
@@ -66,6 +70,10 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
+        if(Objects.equals(match.getMatchIntakeFull(), userListInMatchRepository.countByMatch(match))) {
+            throw new IllegalArgumentException("참여 가능 인원이 초과되었습니다");
+        }
+
         if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
             throw new IllegalArgumentException("이미 신청한 매치 입니다");
         }
@@ -86,9 +94,8 @@ public class MatchService {
                 .profileImage(user.getProfileImage())
                 .build();
 
-        RequestUserList requestUserList = new RequestUserList(inviteResponseDto);
+        RequestUserList requestUserList = new RequestUserList(inviteResponseDto, match);
 
-        requestUserList.setMatch(match);
         requestUserListRepository.save(requestUserList);
 
 //        userListInMatchRepository.save(UserListInMatch.builder()
@@ -100,7 +107,9 @@ public class MatchService {
     }
 
     //입장 수락 or 거절
-    public void permitUser(InviteRequestDto inviteRequestDto, String token) {
+
+    @Transactional
+    public List<InviteResponseDto> permitUser(InviteRequestDto inviteRequestDto, String token) {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
@@ -111,18 +120,25 @@ public class MatchService {
         }
 
         user = userRepository.findByNickname(inviteRequestDto.getNickname());
+
         RequestUserList requestUserList = requestUserListRepository.findByNickname(user.getNickname());
 
-        if (inviteRequestDto.isPermit()) {
+        if (inviteRequestDto.isPermit() && !userListInMatchRepository.existsByMatchAndUser(match, user)) {
             userListInMatchRepository.save(UserListInMatch.builder()
                     .match(match)
                     .user(user)
                     .build());
 
-            requestUserListRepository.delete(requestUserList);
 
-        } else {
             requestUserListRepository.delete(requestUserList);
+            return showRequestUserList(token);
+
+        } else if(!userListInMatchRepository.existsByMatchAndUser(match, user)){
+            requestUserListRepository.delete(requestUserList);
+            return showRequestUserList(token);
+
+        }else  {
+            throw new IllegalArgumentException("이미 참여중인 회원입니다.");
         }
     }
 

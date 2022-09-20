@@ -32,7 +32,7 @@ public class AuthService {
     public UserResponseDto signup(UserRequestDto userRequestDto) {
 
         if (userRepository.existsByUsername(userRequestDto.getUsername())) {
-            throw new RuntimeException("이미 가입되어 있는 유저입니다");
+            throw new RuntimeException("이미 가입된 아이디 입니다");
         }
 
         User user = userRequestDto.toUser(passwordEncoder);
@@ -43,7 +43,11 @@ public class AuthService {
     @Transactional
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
 
-        User user = userRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow();
+        User user = userRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+
+        if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("회원 정보가 일치하지 않습니다.");
+        }
 
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
 
@@ -76,7 +80,7 @@ public class AuthService {
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
         return userRepository.findById(user_id).orElseThrow(() ->
-                new IllegalArgumentException("유저 정보가 없습니다."));
+                new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
     }
 
     public LoginResponseDto refreshUserInfo(String token) {

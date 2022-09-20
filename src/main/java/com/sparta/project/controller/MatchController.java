@@ -23,9 +23,9 @@ public class MatchController {
     }
 
     @PostMapping("/write")
-    private MatchRequestDto createMatch(@RequestBody MatchRequestDto matchRequestDto, @RequestHeader(value = "Authorization") String token) {
-        matchService.createMatch(matchRequestDto, token);
-        return matchRequestDto;
+    private List<MatchResponseDto> createMatch(@RequestBody MatchRequestDto matchRequestDto, @RequestHeader(value = "Authorization") String token) {
+        return matchService.createMatch(matchRequestDto, token);
+
     }
 
     @PutMapping("/update/{match_id}")

@@ -29,7 +29,7 @@ public class AwsS3Service {
     public File uploadFile(MultipartFile multipartFile) throws IOException {
 
         return convert(multipartFile)
-                .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
+                .orElseThrow(() -> new IllegalArgumentException("파일 변환에 실패했습니다."));
     }
 
     private String upload(File uploadFile) {
