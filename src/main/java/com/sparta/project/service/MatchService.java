@@ -98,11 +98,6 @@ public class MatchService {
 
         requestUserListRepository.save(requestUserList);
 
-//        userListInMatchRepository.save(UserListInMatch.builder()
-//                .user(user)
-//                .match(match)
-//                .build());
-
         return inviteResponseDto;
     }
 

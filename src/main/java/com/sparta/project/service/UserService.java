@@ -25,8 +25,6 @@ public class UserService {
     private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
     private final AuthService authService;
-    private final MatchRepository matchRepository;
-    private final MessageRepository messageRepository;
     private final AwsS3Service awsS3Service;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
@@ -35,6 +33,9 @@ public class UserService {
 
         User user = authService.getUserByToken(token);
 
+        if(user.getNickname().equals(evaluationDto.getNickname())) {
+            throw new IllegalArgumentException("자기 자신은 평가할 수 없습니다");
+        }
 
         List<UserListInMatch> list = userListInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
         for (UserListInMatch userListInMatch : list) {
@@ -45,7 +46,7 @@ public class UserService {
         if (count == 2) {
             evaluationRepository.save(Evaluation.builder()
                     .nickname(evaluationDto.getNickname())
-                    .user(userRepository.findByNickname(evaluationDto.getNickname()))
+                    .user(user)
                     .comment(evaluationDto.getComment())
                     .mannerPoint(evaluationDto.getMannerPoint())
                     .match_id(evaluationDto.getMatch_id())
@@ -55,7 +56,6 @@ public class UserService {
             throw new IllegalArgumentException("평가할 권한이 없습니다.");
         }
         count = 0;
-
     }
 
     public MyPageResponseDto myPage(String sports, String token) {
@@ -141,15 +141,12 @@ public class UserService {
             e.printStackTrace();
             return list;
         }
-
-
     }
 
     @Transactional
     public String uploadProfileImage(MultipartFile multipartFile, String token) throws IOException {
 
         String imageUrl = awsS3Service.saveImageUrl(multipartFile);
-
         User user = authService.getUserByToken(token);
 
         user.uploadImage(imageUrl);
