@@ -9,7 +9,6 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository <Message, Long> {
 
     List<Message> findAllByMatchOrderByCreatedAt(Match match);
-    Message findFirstByMatchOrderByCreatedAtDesc(Match match);
 
     void deleteByMatch(Match match);
 

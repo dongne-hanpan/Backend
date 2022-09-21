@@ -116,7 +116,7 @@ public class MatchService {
 
         user = userRepository.findByNickname(inviteRequestDto.getNickname());
 
-        RequestUserList requestUserList = requestUserListRepository.findByNickname(user.getNickname());
+        RequestUserList requestUserList = requestUserListRepository.findByNicknameAndMatch(user.getNickname(), match);
 
         if (inviteRequestDto.isPermit() && !userListInMatchRepository.existsByMatchAndUser(match, user)) {
             userListInMatchRepository.save(UserListInMatch.builder()
@@ -271,5 +271,18 @@ public class MatchService {
 
     }
 
+
+    @Transactional
+    public String cancelMatch(Long match_id, String token) {
+
+        User user = authService.getUserByToken(token);
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
+
+        RequestUserList requestUserList = requestUserListRepository.findByNicknameAndMatch(user.getNickname(), match);
+        requestUserListRepository.delete(requestUserList);
+
+        return "신청이 취소되었습니다.";
+
+    }
 
 }

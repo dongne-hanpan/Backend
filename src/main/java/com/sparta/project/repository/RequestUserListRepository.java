@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface RequestUserListRepository extends JpaRepository<RequestUserList, Long> {
 
-    RequestUserList findByNickname(String nickname);
+    RequestUserList findByNicknameAndMatch(String nickname, Match match);
     List<RequestUserList> findAllByMatch(Match match);
     boolean existsByNicknameAndMatch(String nickname, Match match);
 

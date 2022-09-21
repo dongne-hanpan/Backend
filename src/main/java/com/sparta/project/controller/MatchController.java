@@ -70,4 +70,10 @@ public class MatchController {
     private MatchResponseDto showChatRoomData(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.chatRoomResponse(match_id, token);
     }
+
+    @GetMapping("/cancel/{match_id}")
+    private String cancelMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return matchService.cancelMatch(match_id, token);
+    }
+
 }
