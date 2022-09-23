@@ -1,5 +1,6 @@
 package com.sparta.project.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.match.MatchRequestDto;
 import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.user.InviteRequestDto;
@@ -70,11 +71,11 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
                 new IllegalArgumentException("매치가 존재하지 않습니다."));
 
-        if(Objects.equals(match.getMatchIntakeFull(), userListInMatchRepository.countByMatch(match))) {
+        if (Objects.equals(match.getMatchIntakeFull(), userListInMatchRepository.countByMatch(match))) {
             throw new IllegalArgumentException("참여 가능 인원이 초과되었습니다");
         }
 
-        if(requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
+        if (requestUserListRepository.existsByNicknameAndMatch(user.getNickname(), match)) {
             throw new IllegalArgumentException("이미 신청한 매치 입니다");
         }
 
@@ -106,7 +107,7 @@ public class MatchService {
     @Transactional
     public List<InviteResponseDto> permitUser(InviteRequestDto inviteRequestDto, String token) {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
-                new IllegalArgumentException("매치가 존재하지 않습니다."));
+                new NotFoundException("매치가 존재하지 않습니다."));
 
         User user = authService.getUserByToken(token);
 
@@ -128,11 +129,11 @@ public class MatchService {
             requestUserListRepository.delete(requestUserList);
             return showRequestUserList(token);
 
-        } else if(!userListInMatchRepository.existsByMatchAndUser(match, user)){
+        } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             requestUserListRepository.delete(requestUserList);
             return showRequestUserList(token);
 
-        }else  {
+        } else {
             throw new IllegalArgumentException("이미 참여중인 회원입니다.");
         }
     }
@@ -183,56 +184,34 @@ public class MatchService {
     }
 
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
-
         List<Match> matches = matchRepository.findAllByRegionAndSports(region, sports);
-        List<MatchResponseDto> list = new ArrayList<>();
+        return getMatchResponseDto(matches);
+    }
 
-        for (Match match : matches) {
-
-            List<UserListInMatchDto> userList = new ArrayList<>();
-
-            for (UserListInMatch userListInMatch : userListInMatchRepository.findAllByMatchId(match.getId())) {
-                userList.add(UserListInMatchDto.builder()
-                        .nickname(userListInMatch.getUser().getNickname())
-                        .build());
-            }
-
-            if (match.getMatchStatus().equals("recruit")) {
-                list.add(MatchResponseDto.builder()
-                        .match_id(match.getId())
-                        .writer(match.getWriter())
-                        .region(match.getRegion())
-                        .contents(match.getContents())
-                        .date(match.getDate())
-                        .time(match.getTime())
-                        .place(match.getPlace())
-                        .placeDetail(match.getPlaceDetail())
-                        .sports(match.getSports())
-                        .matchStatus(match.getMatchStatus())
-                        .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
-                        .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
-                        .matchIntakeFull(match.getMatchIntakeFull())
-                        .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
-                        .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
-                        .userListInMatch(userList)
-                        .build());
-            }
-        }
-        return list;
-
+    public List<MatchResponseDto> getMatchListAll(String sports) {
+        List<Match> matches = matchRepository.findAllBySports(sports);
+        return getMatchResponseDto(matches);
     }
 
     @Transactional
-    public String setMatchStatus(Long match_id, String token) {
-        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
+    public void setMatchStatusDone(Long match_id) {
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
+        MatchRequestDto matchRequestDto = new MatchRequestDto();
+        matchRequestDto.setMatchStatus("done");
+        match.changeStatus(matchRequestDto);
+    }
+
+    @Transactional
+    public String setMatchStatusReserved(Long match_id, String token) {
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
         User user = authService.getUserByToken(token);
 
         if (user.getNickname().equals(match.getWriter())) {
             MatchRequestDto matchRequestDto = new MatchRequestDto();
-            matchRequestDto.setMatchStatus("done");
+            matchRequestDto.setMatchStatus("reserved");
             match.changeStatus(matchRequestDto);
 
-            return "매칭이 종료되었습니다";
+            return "모집이 마감되었습니다.";
         } else {
             return "권한이 없습니다";
         }
@@ -240,7 +219,7 @@ public class MatchService {
 
     public MatchResponseDto chatRoomResponse(Long match_id, String token) {
 
-        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
         User user = authService.getUserByToken(token);
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
@@ -271,18 +250,55 @@ public class MatchService {
 
     }
 
-
     @Transactional
     public String cancelMatch(Long match_id, String token) {
 
         User user = authService.getUserByToken(token);
-        Match match = matchRepository.findById(match_id).orElseThrow(() -> new IllegalArgumentException("매치가 존재하지 않습니다."));
+        Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
 
         RequestUserList requestUserList = requestUserListRepository.findByNicknameAndMatch(user.getNickname(), match);
         requestUserListRepository.delete(requestUserList);
 
         return "신청이 취소되었습니다.";
 
+    }
+
+    private List<MatchResponseDto> getMatchResponseDto(List<Match> matches) {
+
+        List<MatchResponseDto> matchResponseDto = new ArrayList<>();
+
+        for (Match match : matches) {
+
+            List<UserListInMatchDto> userList = new ArrayList<>();
+
+            for (UserListInMatch userListInMatch : userListInMatchRepository.findAllByMatchId(match.getId())) {
+                userList.add(UserListInMatchDto.builder()
+                        .nickname(userListInMatch.getUser().getNickname())
+                        .build());
+            }
+
+            if (match.getMatchStatus().equals("recruit")) {
+                matchResponseDto.add(MatchResponseDto.builder()
+                        .match_id(match.getId())
+                        .writer(match.getWriter())
+                        .region(match.getRegion())
+                        .contents(match.getContents())
+                        .date(match.getDate())
+                        .time(match.getTime())
+                        .place(match.getPlace())
+                        .placeDetail(match.getPlaceDetail())
+                        .sports(match.getSports())
+                        .matchStatus(match.getMatchStatus())
+                        .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
+                        .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
+                        .matchIntakeFull(match.getMatchIntakeFull())
+                        .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
+                        .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
+                        .userListInMatch(userList)
+                        .build());
+            }
+        }
+        return matchResponseDto;
     }
 
 }

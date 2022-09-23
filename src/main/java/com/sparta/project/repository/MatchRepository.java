@@ -8,4 +8,6 @@ import java.util.List;
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findAllByRegionAndSports(Long region, String sports);
     List<Match> findAllByWriter(String writer);
+    List<Match> findAllBySports(String sports);
+
 }
