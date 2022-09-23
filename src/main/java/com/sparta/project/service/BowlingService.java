@@ -5,6 +5,8 @@ import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Match;
 import com.sparta.project.entity.User;
 import com.sparta.project.repository.BowlingRepository;
+import com.sparta.project.repository.MatchRepository;
+import com.sparta.project.repository.UserListInMatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +18,26 @@ public class BowlingService {
     private final ValidationService validationService;
     private final AuthService authService;
     private final CalculateService calculateService;
+    private final UserListInMatchRepository userListInMatchRepository;
+    private final MatchService matchService;
 
     public Long inputMyScore(BowlingDto bowlingDto, String token) {
 
         Match match = validationService.validate(bowlingDto.getMatch_id(), token);
         User user = authService.getUserByToken(token);
 
-        if(match.getMatchStatus().equals("recruit")) {
-            throw new IllegalArgumentException("경기가 종료되지 않았습니다. 종료 후 입력해주세요.");
+        if(match.getMatchStatus().equals("reserved")) {
+            throw new IllegalArgumentException("모집이 종료되지 않았습니다.");
+        }
+
+        if(bowlingRepository.existsByUserAndMatch(user, match)) {
+            throw new IllegalArgumentException("결과가 이미 등록되었습니다.");
+        }
+
+        long resultCnt = bowlingRepository.countAllByMatch(match);
+
+        if(resultCnt == userListInMatchRepository.countByMatch(match)) {
+            matchService.setMatchStatusDone(match.getId());
         }
 
         if(bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {

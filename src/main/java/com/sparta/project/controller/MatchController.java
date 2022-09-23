@@ -22,20 +22,20 @@ public class MatchController {
        return matchService.getMatchList(region, sports);
     }
 
+    @GetMapping("/list/{sports}")
+    private List<MatchResponseDto> getMatchListAll(@PathVariable String sports) {
+        return matchService.getMatchListAll(sports);
+    }
+
     @PostMapping("/write")
     private List<MatchResponseDto> createMatch(@RequestBody MatchRequestDto matchRequestDto, @RequestHeader(value = "Authorization") String token) {
         return matchService.createMatch(matchRequestDto, token);
-
     }
 
     @PutMapping("/update/{match_id}")
     private MatchRequestDto updateMatch(@PathVariable Long match_id, @RequestBody MatchRequestDto matchRequestDto, @RequestHeader(value = "Authorization") String token) {
-        try {
             matchService.updateMatch(match_id, matchRequestDto, token);
             return matchRequestDto;
-        } catch (Exception e) {
-            return null;  // 수정 실패시 에러반환 필요
-        }
     }
 
     @DeleteMapping("/delete/{match_id}")
@@ -61,10 +61,15 @@ public class MatchController {
         return matchService.showRequestUserList(token);
     }
 
-    @GetMapping("/matchstatus/{match_id}")
-    private String setMatchStatus(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
-        return matchService.setMatchStatus(match_id, token);
+    @GetMapping("/match-status-reserved/{match_id}")
+    private String setMatchStatusReserved(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
+        return matchService.setMatchStatusReserved(match_id, token);
     }
+
+//    @GetMapping("/match-status-done/{match_id}")
+//    private void setMatchStatusDone(@PathVariable Long match_id) {
+//        matchService.setMatchStatusDone(match_id);
+//    }
 
     @GetMapping("/chatroom/{match_id}")
     private MatchResponseDto showChatRoomData(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
@@ -75,5 +80,4 @@ public class MatchController {
     private String cancelMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.cancelMatch(match_id, token);
     }
-
 }

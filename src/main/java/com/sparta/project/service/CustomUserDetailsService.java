@@ -22,10 +22,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .map(this::createUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException(username + " -> 회원 정보가 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
     }
 
     private UserDetails createUserDetails(User user) {

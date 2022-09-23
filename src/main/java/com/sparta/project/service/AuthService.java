@@ -1,5 +1,6 @@
 package com.sparta.project.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.token.TokenDto;
 import com.sparta.project.dto.user.LoginRequestDto;
 import com.sparta.project.dto.user.LoginResponseDto;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,7 @@ public class AuthService {
     public UserResponseDto signup(UserRequestDto userRequestDto) {
 
         if (userRepository.existsByUsername(userRequestDto.getUsername())) {
-            throw new RuntimeException("이미 가입된 아이디 입니다");
+            throw new IllegalArgumentException("이미 가입된 아이디 입니다");
         }
 
         User user = userRequestDto.toUser(passwordEncoder);
@@ -46,7 +48,7 @@ public class AuthService {
         User user = userRepository.findByUsername(loginRequestDto.getUsername()).orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
 
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("회원 정보가 일치하지 않습니다.");
+            throw new UsernameNotFoundException("회원 정보가 일치하지 않습니다.");
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();

@@ -5,8 +5,10 @@ import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,7 +29,8 @@ public class AwsS3Service {
     public File uploadFile(MultipartFile multipartFile) throws IOException {
 
         return convert(multipartFile)
-                .orElseThrow(() -> new IllegalArgumentException("파일 변환에 실패했습니다."));
+                .orElseThrow(() -> new UnsupportedMediaTypeStatusException("파일 변환에 실패했습니다."));
+
     }
 
     private String upload(File uploadFile) {

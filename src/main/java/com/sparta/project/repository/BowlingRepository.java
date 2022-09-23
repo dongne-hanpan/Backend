@@ -11,6 +11,7 @@ public interface BowlingRepository extends JpaRepository<Bowling, Long> {
 
     List<Bowling> findAllByUser(User user);
     boolean existsByUserAndMatch(User user, Match match);
+    long countAllByMatch(Match match);
 
 }
 

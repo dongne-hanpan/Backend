@@ -1,5 +1,6 @@
 package com.sparta.project.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.message.ChatMessageDto;
 import com.sparta.project.entity.Match;
 import com.sparta.project.entity.Message;
@@ -32,7 +33,7 @@ public class MessageService {
         chatMessageDto.setMatch_id(match_id);
 
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
-                new IllegalArgumentException("매치가 존재하지 않습니다."));
+                new NotFoundException("매치가 존재하지 않습니다."));
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             throw new IllegalArgumentException("초대 되지않은 매치입니다.");

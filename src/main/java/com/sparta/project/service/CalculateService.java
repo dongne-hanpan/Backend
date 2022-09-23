@@ -2,6 +2,7 @@ package com.sparta.project.service;
 
 import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Evaluation;
+import com.sparta.project.entity.Match;
 import com.sparta.project.entity.User;
 import com.sparta.project.repository.BowlingRepository;
 import com.sparta.project.repository.EvaluationRepository;
@@ -65,7 +66,5 @@ public class CalculateService {
         }
         return "입문";
     }
-
-
 
 }
