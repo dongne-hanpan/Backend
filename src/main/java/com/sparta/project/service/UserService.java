@@ -1,5 +1,7 @@
 package com.sparta.project.service;
 
+import antlr.Token;
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.message.MessageResponseDto;
@@ -7,7 +9,9 @@ import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
 import com.sparta.project.entity.*;
 import com.sparta.project.repository.*;
+import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,15 +30,21 @@ public class UserService {
     private final CalculateService calculateService;
     private final AuthService authService;
     private final AwsS3Service awsS3Service;
+    private final TokenProvider tokenProvider;
+    private final MatchRepository matchRepository;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
         int count = 0;
-
         User user = authService.getUserByToken(token);
+        Match match = matchRepository.findById(evaluationDto.getMatch_id()).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
 
         if(user.getNickname().equals(evaluationDto.getNickname())) {
             throw new IllegalArgumentException("자기 자신은 평가할 수 없습니다");
+        }
+
+        if(evaluationRepository.existsByMatchAndNicknameAndUser(match, evaluationDto.getNickname(), user)) {
+           throw new IllegalArgumentException("이미 평가한 유저입니다.");
         }
 
         List<UserListInMatch> list = userListInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
@@ -49,7 +59,7 @@ public class UserService {
                     .user(user)
                     .comment(evaluationDto.getComment())
                     .mannerPoint(evaluationDto.getMannerPoint())
-                    .match_id(evaluationDto.getMatch_id())
+                    .match(match)
                     .build());
 
         } else {
@@ -59,6 +69,11 @@ public class UserService {
     }
 
     public MyPageResponseDto myPage(String sports, String token) {
+
+        if(!tokenProvider.validateToken(token.substring(7))) {
+            authService.logout(token);
+            throw new UsernameNotFoundException("로그인 시간 만료");
+        }
         User user = authService.getUserByToken(token);
 
         List<String> comment = new ArrayList<>();

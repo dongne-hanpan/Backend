@@ -24,19 +24,20 @@ public class Evaluation {
     @Column
     private double mannerPoint;
 
-    @Column
-    private Long match_id;
+    @ManyToOne
+    @JoinColumn(name = "match_id")
+    private Match match;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
-    public Evaluation(String nickname, String comment, double mannerPoint, User user, Long match_id) {
+    public Evaluation(String nickname, String comment, double mannerPoint, User user, Match match) {
         this.nickname = nickname;
         this.comment = comment;
         this.mannerPoint = mannerPoint;
         this.user = user;
-        this.match_id = match_id;
+        this.match = match;
     }
 }
