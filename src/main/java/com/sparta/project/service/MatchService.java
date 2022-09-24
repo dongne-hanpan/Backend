@@ -29,6 +29,7 @@ public class MatchService {
     private final ValidationService validationService;
     private final AuthService authService;
     private final MessageRepository messageRepository;
+    private final EvaluationRepository evaluationRepository;
 
     //게시글 작성
     public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
@@ -174,7 +175,6 @@ public class MatchService {
         User user = authService.getUserByToken(token);
 
         if (writer.equals(user.getNickname())) {
-
             messageRepository.deleteByMatch(match); // 자식 객체를 먼저 삭제하기 위해 추가
             matchRepository.deleteById(match_id);
         } else {

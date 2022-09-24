@@ -31,19 +31,17 @@ public class UserService {
     private final AuthService authService;
     private final AwsS3Service awsS3Service;
     private final TokenProvider tokenProvider;
-    private final MatchRepository matchRepository;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
         int count = 0;
         User user = authService.getUserByToken(token);
-        Match match = matchRepository.findById(evaluationDto.getMatch_id()).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
 
         if(user.getNickname().equals(evaluationDto.getNickname())) {
             throw new IllegalArgumentException("자기 자신은 평가할 수 없습니다");
         }
 
-        if(evaluationRepository.existsByMatchAndNicknameAndUser(match, evaluationDto.getNickname(), user)) {
+        if(evaluationRepository.existsByMatchIdAndNicknameAndUser(evaluationDto.getMatch_id(), evaluationDto.getNickname(), user)) {
            throw new IllegalArgumentException("이미 평가한 유저입니다.");
         }
 
@@ -59,7 +57,7 @@ public class UserService {
                     .user(user)
                     .comment(evaluationDto.getComment())
                     .mannerPoint(evaluationDto.getMannerPoint())
-                    .match(match)
+                    .match_id(evaluationDto.getMatch_id())
                     .build());
 
         } else {
