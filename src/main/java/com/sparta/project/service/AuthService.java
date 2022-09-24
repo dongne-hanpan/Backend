@@ -73,6 +73,8 @@ public class AuthService {
                 .build();
     }
 
+
+
     @Transactional
     public void logout(String token) {
         User user = getUserByToken(token);

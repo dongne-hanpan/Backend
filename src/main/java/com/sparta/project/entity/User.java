@@ -30,6 +30,8 @@ public class User {
     @Column
     private String profileImage;
 
+    @Column
+    private Long kakaoId;
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
@@ -39,6 +41,14 @@ public class User {
         this.password = password;
         this.nickname = nickname;
         this.authority = authority;
+    }
+    @Builder
+    public User(String username, String nickname, String password, String thumbnailImage, Long kakaoId) {
+        this.username = username;
+        this.nickname = nickname;
+        this.password = password;
+        this.profileImage = thumbnailImage;
+        this.kakaoId = kakaoId;
     }
     public void uploadImage(String url) {
         this.profileImage = url;
