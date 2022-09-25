@@ -1,5 +1,6 @@
 package com.sparta.project.service;
 
+import com.amazonaws.services.kms.model.InvalidGrantTokenException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.token.TokenDto;
 import com.sparta.project.dto.user.LoginRequestDto;
@@ -79,10 +80,16 @@ public class AuthService {
     }
 
     public User getUserByToken(String token) {
+
+        if(!tokenProvider.validateToken(token.substring(7))) {
+            logout(token);
+            throw new UsernameNotFoundException("로그인 시간 만료");
+        }
+
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
         return userRepository.findById(user_id).orElseThrow(() ->
-                new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+                new UsernameNotFoundException("회원 정보가 존재하지 않습니다."));
     }
 
     public LoginResponseDto refreshUserInfo(String token) {
