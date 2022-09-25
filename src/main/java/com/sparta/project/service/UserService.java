@@ -68,10 +68,7 @@ public class UserService {
 
     public MyPageResponseDto myPage(String sports, String token) {
 
-        if(!tokenProvider.validateToken(token.substring(7))) {
-            authService.logout(token);
-            throw new UsernameNotFoundException("로그인 시간 만료");
-        }
+
         User user = authService.getUserByToken(token);
 
         List<String> comment = new ArrayList<>();

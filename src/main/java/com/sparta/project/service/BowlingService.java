@@ -26,7 +26,7 @@ public class BowlingService {
         Match match = validationService.validate(bowlingDto.getMatch_id(), token);
         User user = authService.getUserByToken(token);
 
-        if(match.getMatchStatus().equals("reserved")) {
+        if(match.getMatchStatus().equals("recruit")) {
             throw new IllegalArgumentException("모집이 종료되지 않았습니다.");
         }
 

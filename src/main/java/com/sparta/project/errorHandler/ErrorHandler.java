@@ -1,5 +1,6 @@
 package com.sparta.project.errorHandler;
 
+import com.amazonaws.services.kms.model.InvalidGrantTokenException;
 import com.amazonaws.services.kms.model.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,5 +29,10 @@ public class ErrorHandler {
     @ExceptionHandler(UnsupportedMediaTypeStatusException.class)
     public ResponseEntity<Object> ErrorMessageImageCheck(Exception ex) {
         return ResponseEntity.status(415).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidGrantTokenException.class)
+    public ResponseEntity<Object> ErrorMessageToken(Exception ex) {
+        return ResponseEntity.status(403).body(ex.getMessage());
     }
 }

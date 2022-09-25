@@ -70,7 +70,7 @@ public class MatchService {
 
         User user = authService.getUserByToken(token);
         Match match = matchRepository.findById(match_id).orElseThrow(() ->
-                new IllegalArgumentException("매치가 존재하지 않습니다."));
+                new NotFoundException("매치가 존재하지 않습니다."));
 
         if (Objects.equals(match.getMatchIntakeFull(), userListInMatchRepository.countByMatch(match))) {
             throw new IllegalArgumentException("참여 가능 인원이 초과되었습니다");

@@ -48,7 +48,9 @@ public class MessageService {
 
     public List<ChatMessageDto> showMessage(Long match_id, String token) {
 
-        Match match = matchRepository.findById(match_id).orElseThrow();
+        Match match = matchRepository.findById(match_id).orElseThrow(() ->
+                new NotFoundException("매치가 존재하지 않습니다."));
+
         User user = authService.getUserByToken(token);
 
         if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
