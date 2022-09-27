@@ -6,6 +6,7 @@ import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.service.MatchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,13 +45,13 @@ public class MatchController {
     }
 
     //입장신청
-    @GetMapping("/enter/{match_id}")
+    @GetMapping(value = "/enter/{match_id}", consumes = MediaType.ALL_VALUE)
     private InviteResponseDto enterMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.enterRequest(match_id, token);
     }
 
     //입장 수락 or 거절
-    @PostMapping("/permit")
+    @PostMapping(value = "/permit", consumes = MediaType.ALL_VALUE)
     private void permitUser(@RequestBody InviteRequestDto inviteRequestDto, @RequestHeader(value = "Authorization") String token) {
         matchService.permitUser(inviteRequestDto, token);
     }

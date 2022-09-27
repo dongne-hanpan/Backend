@@ -29,7 +29,7 @@ public class MatchService {
     private final ValidationService validationService;
     private final AuthService authService;
     private final MessageRepository messageRepository;
-    private final EvaluationRepository evaluationRepository;
+    private final NotificationService notificationService;
 
     //게시글 작성
     public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
@@ -97,8 +97,9 @@ public class MatchService {
                 .build();
 
         RequestUserList requestUserList = new RequestUserList(inviteResponseDto, match);
-
         requestUserListRepository.save(requestUserList);
+
+        notificationService.showRequestUser(match_id, user.getId());
 
         return inviteResponseDto;
     }
@@ -126,11 +127,12 @@ public class MatchService {
                     .user(user)
                     .build());
 
-
+            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
             return showRequestUserList(token);
 
         } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
+            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
             return showRequestUserList(token);
 

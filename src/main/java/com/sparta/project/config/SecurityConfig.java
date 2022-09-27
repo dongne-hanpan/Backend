@@ -80,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/match/**").permitAll()
                 .antMatchers("/user/kakao/callback").permitAll()
                 .antMatchers("/").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
 
                 .and()
                 .oauth2Login()
