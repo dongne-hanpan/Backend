@@ -10,11 +10,14 @@ import com.sparta.project.entity.*;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +32,8 @@ public class MatchService {
     private final ValidationService validationService;
     private final AuthService authService;
     private final MessageRepository messageRepository;
-    private final EvaluationRepository evaluationRepository;
+
+//    public List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
     //게시글 작성
     public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
@@ -100,8 +104,35 @@ public class MatchService {
 
         requestUserListRepository.save(requestUserList);
 
+//        Map<String, InviteResponseDto> map = new HashMap<>();
+//        map.put("request", inviteResponseDto);
+//
+//        for(SseEmitter emitter : emitters) {
+//            try {
+//                emitter.send(SseEmitter.event().name("request").data(map));
+//                System.out.println(emitter);
+//            }catch (IOException e) {
+//                emitters.remove(emitter);
+//            }
+//        }
+
         return inviteResponseDto;
     }
+
+//    public void EventToClients() {
+//
+//
+//        for(SseEmitter emitter : emitters) {
+//            try {
+//                emitter.send(SseEmitter.event().name("request").data(inviteResponseDto));
+//
+//            }catch (IOException e) {
+//                emitters.remove(emitter);
+//            }
+//        }
+//
+//    }
+
 
     //입장 수락 or 거절
 
@@ -179,6 +210,9 @@ public class MatchService {
             matchRepository.deleteById(match_id);
         } else {
             UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
+            if(!bowlingRepository.existsByUserAndMatch(user, match)) {
+                throw new IllegalArgumentException("결과 입력이 되지 않았습니다.");
+            }
             userListInMatchRepository.delete(userListInMatch);
         }
     }
@@ -300,5 +334,7 @@ public class MatchService {
         }
         return matchResponseDto;
     }
+
+
 
 }

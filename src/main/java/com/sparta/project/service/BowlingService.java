@@ -26,6 +26,7 @@ public class BowlingService {
         Match match = validationService.validate(bowlingDto.getMatch_id(), token);
         User user = authService.getUserByToken(token);
 
+
         if(match.getMatchStatus().equals("recruit")) {
             throw new IllegalArgumentException("모집이 종료되지 않았습니다.");
         }
@@ -34,11 +35,6 @@ public class BowlingService {
             throw new IllegalArgumentException("결과가 이미 등록되었습니다.");
         }
 
-        long resultCnt = bowlingRepository.countAllByMatch(match);
-
-        if(resultCnt == userListInMatchRepository.countByMatch(match)) {
-            matchService.setMatchStatusDone(match.getId());
-        }
 
         if(bowlingDto.getMyScore() <= 300 && bowlingDto.getMyScore() >= 0) {
             bowlingRepository.save(Bowling.builder()
@@ -46,6 +42,16 @@ public class BowlingService {
                     .user(user)
                     .match(match)
                     .build());
+
+            long resultCnt = bowlingRepository.countByMatch(match);
+
+            if(resultCnt == userListInMatchRepository.countByMatch(match)) {
+                matchService.setMatchStatusDone(match.getId());
+            }
+
+            System.out.println(resultCnt);
+            System.out.println(userListInMatchRepository.countByMatch(match));
+
 
             return calculateService.calculateAverageScore(user);
         }

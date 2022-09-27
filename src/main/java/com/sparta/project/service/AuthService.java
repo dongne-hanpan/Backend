@@ -79,19 +79,22 @@ public class AuthService {
         refreshTokenRepository.deleteByKey(user.getId().toString());
     }
 
+    @Transactional
     public User getUserByToken(String token) {
-
-        if(!tokenProvider.validateToken(token.substring(7))) {
-            logout(token);
-            throw new UsernameNotFoundException("로그인 시간 만료");
-        }
 
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
+
+        if(!tokenProvider.validateToken(token.substring(7))) {
+            refreshTokenRepository.deleteByKey(user_id.toString());
+            throw new UsernameNotFoundException("로그인 유효시간이 경과하였습니다.");
+        }
+
         return userRepository.findById(user_id).orElseThrow(() ->
                 new UsernameNotFoundException("회원 정보가 존재하지 않습니다."));
     }
 
+    @Transactional
     public LoginResponseDto refreshUserInfo(String token) {
 
         User user = getUserByToken(token);

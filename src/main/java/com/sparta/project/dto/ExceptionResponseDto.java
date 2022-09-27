@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExceptionResponse {
+public class ExceptionResponseDto {
 
     private int statusCode;
     private String message;
