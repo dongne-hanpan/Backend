@@ -3,32 +3,30 @@ package com.sparta.project.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.project.dto.user.KakaoLoginResponseDto;
-import com.sparta.project.dto.KakaoUserInfoDto;
 import com.sparta.project.dto.token.TokenDto;
+import com.sparta.project.dto.user.KakaoLoginResponseDto;
+import com.sparta.project.dto.user.KakaoUserInfoDto;
+import com.sparta.project.entity.Authority;
 import com.sparta.project.entity.RefreshToken;
 import com.sparta.project.entity.User;
 import com.sparta.project.repository.RefreshTokenRepository;
 import com.sparta.project.repository.UserRepository;
 import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -36,12 +34,11 @@ import java.util.UUID;
 public class KakaoUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final CalculateService calculateService;
-    public KakaoLoginResponseDto kakaoLogin(String code) throws JsonProcessingException {
+    public KakaoLoginResponseDto kakaoLogin(String code) throws JsonProcessingException, UnsupportedEncodingException {
 
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getAccessToken(code);
@@ -52,11 +49,11 @@ public class KakaoUserService {
         // 3. "카카오 사용자 정보"로 필요시 회원가입
         User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
-
         // 4. 3단계에서 DB 중복검사가 된 유저 정보로 토큰 생성해서 dto에 담아서 retyrn
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(kakaoUser.getUsername(), kakaoUser.getPassword());
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        //현재 로그인된 사람의 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
@@ -88,20 +85,13 @@ public class KakaoUserService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "7865af779df1a9975124d3cd86d9a5d4");
-        body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
+        body.add("redirect_uri", "http://3.38.191.6/user/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
                 new HttpEntity<>(body, headers);
         RestTemplate rt = new RestTemplate();
-        rt.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        rt.setErrorHandler(new DefaultResponseErrorHandler(){
-            public boolean hasError(ClientHttpResponse response) throws IOException, IOException {
-                HttpStatus statusCode = response.getStatusCode();
-                return statusCode.series() == HttpStatus.Series.SERVER_ERROR;
-            }
-        });
 
         ResponseEntity<String> response = rt.exchange(
                 "https://kauth.kakao.com/oauth/token",
@@ -112,15 +102,12 @@ public class KakaoUserService {
 
         // HTTP 응답 (JSON) -> 액세스 토큰 파싱
         String responseBody = response.getBody();
-        System.out.println("responseBody: " + responseBody);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
-        System.out.println("jsonNode: " + jsonNode);
-        System.out.println("access_token: " + jsonNode.get("access_token").asText());
         return jsonNode.get("access_token").asText();
     }
 
-    private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
+    private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException, UnsupportedEncodingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -129,13 +116,6 @@ public class KakaoUserService {
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
         RestTemplate rt = new RestTemplate();
-        rt.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        rt.setErrorHandler(new DefaultResponseErrorHandler(){
-            public boolean hasError(ClientHttpResponse response) throws IOException {
-                HttpStatus statusCode = response.getStatusCode();
-                return statusCode.series() == HttpStatus.Series.SERVER_ERROR;
-            }
-        });
 
         ResponseEntity<String> response = rt.exchange(
                 "https://kapi.kakao.com/v2/user/me",
@@ -150,6 +130,7 @@ public class KakaoUserService {
         Long id = jsonNode.get("id").asLong();
         String nickname = jsonNode.get("properties")
                 .get("nickname").asText();
+
         String thumbnailImage = jsonNode.get("properties")
                 .get("thumbnail_image").asText();
 
@@ -164,26 +145,19 @@ public class KakaoUserService {
         if (kakaoUser == null) {
             // 회원가입
             // username: kakao nickname
-            String username = kakaoUserInfo.getNickname();
 
-            String nickname = kakaoUserInfo.getNickname();
-
-            // password: random UUID
-            String password = UUID.randomUUID().toString();
-            String encodedPassword = passwordEncoder.encode(password);
-
-            // thumbnail: kakao thumbnailImage
-            String thumbnailImage = kakaoUserInfo.getThumbnailImage();
-
-
-            kakaoUser = new User(username, nickname, encodedPassword, thumbnailImage, kakaoId);
-            userRepository.save(kakaoUser);
-
-
+            return userRepository.save(User.builder()
+                    .username(UUID.randomUUID().toString())
+                    .nickname(kakaoUserInfo.getNickname())
+                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .authority(Authority.ROLE_USER)
+                    .kakaoId(kakaoId)
+                    .thumbnailImage(kakaoUserInfo.getThumbnailImage())
+                    .build());
 
         }
-
         return kakaoUser;
+
     }
 
 
