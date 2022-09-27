@@ -56,6 +56,8 @@ dependencies {
 	//sdk for java 의존성 (s3 관리 툴)
 	implementation "software.amazon.awssdk:s3:2.13.0"
 
+
+	//oauth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
