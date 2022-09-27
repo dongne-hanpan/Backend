@@ -37,12 +37,12 @@ public class UserService {
         int count = 0;
         User user = authService.getUserByToken(token);
 
-        if (user.getNickname().equals(evaluationDto.getNickname())) {
+        if(user.getNickname().equals(evaluationDto.getNickname())) {
             throw new IllegalArgumentException("자기 자신은 평가할 수 없습니다");
         }
 
-        if (evaluationRepository.existsByMatchIdAndNicknameAndUser(evaluationDto.getMatch_id(), evaluationDto.getNickname(), user)) {
-            throw new IllegalArgumentException("이미 평가한 유저입니다.");
+        if(evaluationRepository.existsByMatchIdAndNicknameAndUser(evaluationDto.getMatch_id(), evaluationDto.getNickname(), user)) {
+           throw new IllegalArgumentException("이미 평가한 유저입니다.");
         }
 
         List<UserListInMatch> list = userListInMatchRepository.findAllByMatchId(evaluationDto.getMatch_id());
@@ -135,17 +135,16 @@ public class UserService {
 
         try {
             for (UserListInMatch match : matches) {
-
-                list.add(MessageResponseDto.builder()
-                        .chatId(match.getMatch().getId())
-                        .profileImage(userRepository.findByNickname(match.getMatch().getWriter()).getProfileImage())
-                        .hostNickname(userRepository.findByNickname(match.getMatch().getWriter()).getNickname())
-                        .matchStatus(match.getMatch().getMatchStatus())
-                        .date(match.getMatch().getDate())
-                        .time(match.getMatch().getTime())
-                        .place(match.getMatch().getPlace())
-                        .build());
-
+                if (!match.getMatch().getMatchStatus().equals("done")) {
+                    list.add(MessageResponseDto.builder()
+                            .chatId(match.getMatch().getId())
+                            .profileImage(userRepository.findByNickname(match.getMatch().getWriter()).getProfileImage())
+                            .hostNickname(userRepository.findByNickname(match.getMatch().getWriter()).getNickname())
+                            .date(match.getMatch().getDate())
+                            .time(match.getMatch().getTime())
+                            .place(match.getMatch().getPlace())
+                            .build());
+                }
             }
             return list;
         } catch (Exception e) {
