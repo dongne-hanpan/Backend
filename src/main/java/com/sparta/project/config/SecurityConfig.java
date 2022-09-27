@@ -5,7 +5,6 @@ import com.sparta.project.security.JwtAuthenticationEntryPoint;
 import com.sparta.project.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -79,8 +78,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/match/**").permitAll()
+                .antMatchers("/user/kakao/callback").permitAll()
                 .antMatchers("/").permitAll()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
+
+                .and()
+                .oauth2Login()
+                .defaultSuccessUrl("/user/kakao/callback", true)
 
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));

@@ -30,14 +30,18 @@ public class User {
     @Column
     private String profileImage;
 
+    @Column
+    private Long kakaoId;
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
     @Builder
-    public User(String username, String password, String nickname, Authority authority) {
+    public User(String username, String nickname, String password, String thumbnailImage, Long kakaoId, Authority authority) {
         this.username = username;
-        this.password = password;
         this.nickname = nickname;
+        this.password = password;
+        this.profileImage = thumbnailImage;
+        this.kakaoId = kakaoId;
         this.authority = authority;
     }
     public void uploadImage(String url) {
