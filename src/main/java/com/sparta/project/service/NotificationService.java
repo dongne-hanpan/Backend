@@ -14,6 +14,7 @@ import com.sparta.project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import static com.sparta.project.controller.NotificationController.sseEmitters;
 
 import java.io.IOException;
@@ -26,16 +27,15 @@ import java.util.Objects;
 public class NotificationService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
-    //    private final AuthService authService;
+    private final AuthService authService;
     private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
     private final RequestUserListRepository requestUserListRepository;
 
-    public SseEmitter subscribe(Long id) {
+    public SseEmitter subscribe(Long userId) {
 
-//        User user = authService.getUserByToken(token);
+        User user = userRepository.findById(userId).orElseThrow();
 
-        User user = userRepository.findById(id).orElseThrow();
         List<Match> matches = matchRepository.findAllByWriter(user.getNickname());
         List<InviteResponseDto> userList = new ArrayList<>();
 
@@ -62,11 +62,11 @@ public class NotificationService {
         }
 
         // user의 pk값을 key값으로 해서 SseEmitter를 저장
-        sseEmitters.put(id, sseEmitter);
+        sseEmitters.put(user.getId(), sseEmitter);
 
-        sseEmitter.onCompletion(() -> sseEmitters.remove(id));
-        sseEmitter.onTimeout(() -> sseEmitters.remove(id));
-        sseEmitter.onError((e) -> sseEmitters.remove(id));
+        sseEmitter.onCompletion(() -> sseEmitters.remove(user.getId()));
+        sseEmitter.onTimeout(() -> sseEmitters.remove(user.getId()));
+        sseEmitter.onError((e) -> sseEmitters.remove(user.getId()));
 
         return sseEmitter;
     }
@@ -94,10 +94,9 @@ public class NotificationService {
                     .build();
 
             try {
-                sseEmitter.send(SseEmitter.event().name("message").data("알림이 도착했습니다."));
                 sseEmitter.send(SseEmitter.event().name("request").data(inviteResponseDto));
             } catch (Exception e) {
-                e.printStackTrace();
+                sseEmitters.remove(user.getId());
             }
         }
     }
@@ -124,7 +123,7 @@ public class NotificationService {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }else {
+            } else {
                 InviteRequestReturnMessageDto returnMessageDto = InviteRequestReturnMessageDto.builder()
                         .date(match.getDate())
                         .time(match.getTime())
@@ -138,13 +137,37 @@ public class NotificationService {
                 try {
                     sseEmitter.send(SseEmitter.event().name("message").data(returnMessageDto));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    sseEmitters.remove(userId);
                 }
+
             }
 
+        }
+    }
 
+    public void deleteAlarm(Match match) {
 
+        User user = userRepository.findByNickname(match.getWriter());
+        List<InviteResponseDto> userList = new ArrayList<>();
+
+        List<RequestUserList> lists = requestUserListRepository.findAllByMatch(match);
+        for (RequestUserList requestUserList : lists) {
+            userList.add(InviteResponseDto.builder()
+                    .match_id(match.getId())
+                    .nickname(requestUserList.getNickname())
+                    .userLevel(calculateService.calculateLevel(user))
+                    .mannerPoint(calculateService.calculateMannerPoint(user))
+                    .profileImage(user.getProfileImage())
+                    .build());
         }
 
+        if (sseEmitters.containsKey(user.getId())) {
+            SseEmitter sseEmitter = sseEmitters.get(user.getId());
+            try {
+                sseEmitter.send(SseEmitter.event().name("connect").data(userList));
+            } catch (Exception e) {
+                sseEmitters.remove(user.getId());
+            }
+        }
     }
 }

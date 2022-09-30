@@ -17,9 +17,11 @@ public class NotificationController {
     public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
     @CrossOrigin
-    @GetMapping(value = "/sub/{id}", consumes = MediaType.ALL_VALUE)
-    public SseEmitter subscribe(@PathVariable Long id) {
-        return notificationService.subscribe(id);
+    @GetMapping(value = "/sub/{userId}", consumes = MediaType.ALL_VALUE)
+    public SseEmitter subscribe(@PathVariable Long userId) {
+        System.out.println(userId);
+        return notificationService.subscribe(userId);
     }
 
 }
+//@RequestHeader(value = "Authorization") String token
