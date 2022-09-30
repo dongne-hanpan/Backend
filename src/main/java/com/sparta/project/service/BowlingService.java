@@ -34,7 +34,7 @@ public class BowlingService {
             throw new IllegalArgumentException("결과가 이미 등록되었습니다.");
         }
 
-        long resultCnt = bowlingRepository.countAllByMatch(match);
+        long resultCnt = bowlingRepository.countByMatch(match);
 
         if(resultCnt == userListInMatchRepository.countByMatch(match)) {
             matchService.setMatchStatusDone(match.getId());

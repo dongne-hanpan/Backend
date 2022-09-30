@@ -49,7 +49,6 @@ public class MatchService {
                 .build());
 
         return getMatchList(matchRequestDto.getRegion(), matchRequestDto.getSports());
-
     }
 
     //게시글 수정
@@ -99,7 +98,7 @@ public class MatchService {
         RequestUserList requestUserList = new RequestUserList(inviteResponseDto, match);
         requestUserListRepository.save(requestUserList);
 
-        notificationService.showRequestUser(match_id, user.getId());
+//        notificationService.showRequestUser(match_id, user.getId());
 
         return inviteResponseDto;
     }
@@ -129,11 +128,13 @@ public class MatchService {
 
             notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
+//            notificationService.deleteAlarm(match);
             return showRequestUserList(token);
 
         } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
+//            notificationService.deleteAlarm(match);
             return showRequestUserList(token);
 
         } else {
@@ -181,6 +182,9 @@ public class MatchService {
             matchRepository.deleteById(match_id);
         } else {
             UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
+            if(!bowlingRepository.existsByUserAndMatch(user, match)) {
+                throw new IllegalArgumentException("결과 입력이 되지 않았습니다.");
+            }
             userListInMatchRepository.delete(userListInMatch);
         }
     }

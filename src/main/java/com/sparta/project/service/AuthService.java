@@ -66,6 +66,7 @@ public class AuthService {
         return LoginResponseDto.builder()
                 .grantType(tokenDto.getGrantType())
                 .accessToken(tokenDto.getAccessToken())
+                .userId(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .mannerPoint(calculateService.calculateMannerPoint(user))
@@ -83,10 +84,10 @@ public class AuthService {
 
     public User getUserByToken(String token) {
 
-        if(!tokenProvider.validateToken(token.substring(7))) {
-            logout(token);
-            throw new UsernameNotFoundException("로그인 시간 만료");
-        }
+//        if(!tokenProvider.validateToken(token.substring(7))) {
+//            logout(token);
+//            throw new UsernameNotFoundException("로그인 시간 만료");
+//        }
 
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
@@ -103,6 +104,7 @@ public class AuthService {
                 .profileImage(user.getProfileImage())
                 .mannerPoint(calculateService.calculateMannerPoint(user))
                 .nickname(user.getNickname())
+                .userId(user.getId())
                 .build();
     }
 
