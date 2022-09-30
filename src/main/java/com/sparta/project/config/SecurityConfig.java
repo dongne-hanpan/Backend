@@ -3,6 +3,7 @@ package com.sparta.project.config;
 import com.sparta.project.security.JwtAccessDeniedHandler;
 import com.sparta.project.security.JwtAuthenticationEntryPoint;
 import com.sparta.project.security.TokenProvider;
+import com.sparta.project.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -77,10 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/match/**").permitAll()
                 .antMatchers("/user/kakao/callback").permitAll()
-                .antMatchers("/").permitAll()
-                .anyRequest().permitAll()
+                .antMatchers("/api/match/list/**").permitAll()
+                .antMatchers("/chat/**").permitAll()
+                .antMatchers("/ws/chat/**").permitAll()
+                .anyRequest().authenticated()
 
                 .and()
                 .oauth2Login()

@@ -70,7 +70,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .mannerPoint(calculateService.calculateMannerPoint(user))
-                .profileImage(null)
+                .profileImage(user.getProfileImage())
                 .build();
     }
 
@@ -83,11 +83,6 @@ public class AuthService {
     }
 
     public User getUserByToken(String token) {
-
-//        if(!tokenProvider.validateToken(token.substring(7))) {
-//            logout(token);
-//            throw new UsernameNotFoundException("로그인 시간 만료");
-//        }
 
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());

@@ -1,8 +1,12 @@
 package com.sparta.project.security;
 
+import com.nimbusds.oauth2.sdk.ErrorResponse;
+import com.sparta.project.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,8 +32,9 @@ public class JwtFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
             Authentication authentication = tokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        }else if(StringUtils.hasText(jwt) && !tokenProvider.validateToken(jwt)) {
+            request.setAttribute("exception", "exception");
         }
-
         filterChain.doFilter(request, response);
     }
 
@@ -40,4 +45,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
 }

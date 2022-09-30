@@ -11,7 +11,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 @RestControllerAdvice
 public class ErrorHandler {
-
+    
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> ErrorMessageUserCheck(Exception ex) {
         ExceptionResponseDto exceptionResponseDto = ExceptionResponseDto.builder()
