@@ -106,7 +106,7 @@ public class MatchService {
     //입장 수락 or 거절
 
     @Transactional
-    public List<InviteResponseDto> permitUser(InviteRequestDto inviteRequestDto, String token) {
+    public void permitUser(InviteRequestDto inviteRequestDto, String token) {
         Match match = matchRepository.findById(inviteRequestDto.getMatch_id()).orElseThrow(() ->
                 new NotFoundException("매치가 존재하지 않습니다."));
 
@@ -128,14 +128,22 @@ public class MatchService {
 
             notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
+
+            messageRepository.save(Message.builder()
+                    .message("님이 입장하셨습니다.")
+                    .match(match)
+                    .user(user)
+                    .type("enter")
+                    .build());
+
 //            notificationService.deleteAlarm(match);
-            return showRequestUserList(token);
+
 
         } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
             notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
             requestUserListRepository.delete(requestUserList);
 //            notificationService.deleteAlarm(match);
-            return showRequestUserList(token);
+
 
         } else {
             throw new IllegalArgumentException("이미 참여중인 회원입니다.");
@@ -182,11 +190,17 @@ public class MatchService {
             matchRepository.deleteById(match_id);
         } else {
             UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
-            if(!bowlingRepository.existsByUserAndMatch(user, match)) {
+            if (!bowlingRepository.existsByUserAndMatch(user, match) && !match.getMatchStatus().equals("recruit")) {
                 throw new IllegalArgumentException("결과 입력이 되지 않았습니다.");
             }
             userListInMatchRepository.delete(userListInMatch);
         }
+        messageRepository.save(Message.builder()
+                .message("님이 퇴장했습니다.")
+                .match(match)
+                .user(user)
+                .type("leave")
+                .build());
     }
 
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
@@ -204,6 +218,14 @@ public class MatchService {
         Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("매치가 존재하지 않습니다."));
         MatchRequestDto matchRequestDto = new MatchRequestDto();
         matchRequestDto.setMatchStatus("done");
+
+        messageRepository.save(Message.builder()
+                .message("경기가 종료되었습니다.")
+                .match(match)
+                .user(userRepository.findByNickname(match.getWriter()))
+                .type("done")
+                .build());
+
         match.changeStatus(matchRequestDto);
     }
 
@@ -216,6 +238,13 @@ public class MatchService {
             MatchRequestDto matchRequestDto = new MatchRequestDto();
             matchRequestDto.setMatchStatus("reserved");
             match.changeStatus(matchRequestDto);
+
+            messageRepository.save(Message.builder()
+                    .message("모집이 완료되었습니다.")
+                    .match(match)
+                    .user(user)
+                    .type("reserved")
+                    .build());
 
             return "모집이 마감되었습니다.";
         } else {

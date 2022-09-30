@@ -41,6 +41,7 @@ public class MessageService {
 
         messageRepository.save(Message.builder()
                 .message(chatMessageDto.getMessage())
+                .type(chatMessageDto.getType())
                 .user(user)
                 .match(match)
                 .build());
@@ -64,6 +65,7 @@ public class MessageService {
             messageList.add(ChatMessageDto.builder()
                     .message(message.getMessage())
                     .match_id(match_id)
+                    .type(message.getType())
                     .sender(message.getUser().getNickname())
                     .createdAt(message.getCreatedAt())
                     .build()

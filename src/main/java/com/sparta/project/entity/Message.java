@@ -21,6 +21,9 @@ public class Message extends Timestamped {
     @Column
     private String message;
 
+    @Column
+    private String type;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
