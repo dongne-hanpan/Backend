@@ -5,6 +5,7 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import com.sparta.project.dto.match.MatchResponseDto;
 import com.sparta.project.dto.match.UserListInMatchDto;
 import com.sparta.project.dto.message.MessageResponseDto;
+import com.sparta.project.dto.user.CommentDto;
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
 import com.sparta.project.entity.*;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import javax.xml.stream.events.Comment;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +32,13 @@ public class UserService {
     private final CalculateService calculateService;
     private final AuthService authService;
     private final AwsS3Service awsS3Service;
-    private final TokenProvider tokenProvider;
 
     public void evaluateUser(EvaluationDto evaluationDto, String token) {
 
         int count = 0;
         User user = authService.getUserByToken(token);
 
-        if(user.getNickname().equals(evaluationDto.getNickname())) {
+        if (user.getNickname().equals(evaluationDto.getNickname())) {
             throw new IllegalArgumentException("자기 자신은 평가할 수 없습니다");
         }
 
@@ -68,15 +69,7 @@ public class UserService {
 
     public MyPageResponseDto myPage(String sports, String token) {
 
-
         User user = authService.getUserByToken(token);
-
-        List<String> comment = new ArrayList<>();
-
-        // 입력된 코멘트 불러오기
-        for (Evaluation evaluation : evaluationRepository.findAllByNickname(user.getNickname())) {
-            comment.add(evaluation.getComment());
-        }
 
         // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
@@ -112,7 +105,6 @@ public class UserService {
             List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
             return MyPageResponseDto.builder()
-                    .comment(comment)
                     .nickname(user.getNickname())
                     .mannerPoint(calculateService.calculateMannerPoint(user))
                     .matchCount(bowling.size())
@@ -163,5 +155,22 @@ public class UserService {
         user.uploadImage(imageUrl);
 
         return imageUrl;
+    }
+
+    public List<CommentDto> showComment(String nickname) {
+        System.out.println(nickname);
+        List<CommentDto> commentList = new ArrayList<>();
+
+        for (Evaluation evaluation : evaluationRepository.findAllByNickname(nickname)) {
+            User user = evaluation.getUser();
+
+            commentList.add(CommentDto.builder()
+                    .comment(evaluation.getComment())
+                    .mannerPoint(evaluation.getMannerPoint())
+                    .nickname(nickname)
+                    .writer(user.getNickname())
+                    .build());
+        }
+        return commentList;
     }
 }

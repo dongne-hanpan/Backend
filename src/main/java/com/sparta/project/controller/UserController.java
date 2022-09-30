@@ -1,8 +1,10 @@
 package com.sparta.project.controller;
 
 import com.sparta.project.dto.message.MessageResponseDto;
+import com.sparta.project.dto.user.CommentDto;
 import com.sparta.project.dto.user.EvaluationDto;
 import com.sparta.project.dto.user.MyPageResponseDto;
+import com.sparta.project.entity.Evaluation;
 import com.sparta.project.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,4 +41,8 @@ public class UserController {
         return userService.uploadProfileImage(multipartFile, token);
     }
 
+    @PostMapping("/show-comment")
+    private List<CommentDto> showComment(@RequestBody EvaluationDto evaluationDto) {
+        return userService.showComment(evaluationDto.getNickname());
+    }
 }
