@@ -1,6 +1,6 @@
 package com.sparta.project.security;
 
-import com.sparta.project.dto.TokenDto;
+import com.sparta.project.dto.token.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -67,6 +67,7 @@ public class TokenProvider {
                 .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
                 .refreshToken(refreshToken)
                 .build();
+
     }
 
     // token을 매개변수로 받아서, 토큰에 담긴 정보를 이용해 Authentication 객체를 리턴하는
@@ -114,4 +115,7 @@ public class TokenProvider {
             return e.getClaims();
         }
     }
+
+
+
 }

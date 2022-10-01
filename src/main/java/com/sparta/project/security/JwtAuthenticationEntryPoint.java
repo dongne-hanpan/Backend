@@ -14,6 +14,20 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         // 유효한 자격증명을 제공하지 않고 접근하려 할때 401
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        String exception = (String) request.getAttribute("exception");
+
+        if (exception.equals("exception")) {
+            setResponse(response);
+        }
     }
+
+    private void setResponse(HttpServletResponse response) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        response.getWriter().println("\"message\" : \"로그인 시간이 만료되었습니다." + "\""
+                + "\n" + "\"statusCode\" : \"" + "401" + "\""
+        );
+    }
+
 }
