@@ -98,7 +98,7 @@ public class MatchService {
         RequestUserList requestUserList = new RequestUserList(inviteResponseDto, match);
         requestUserListRepository.save(requestUserList);
 
-//        notificationService.showRequestUser(match_id, user.getId());
+        notificationService.send(match.getWriter(), "apply", user, match);
 
         return inviteResponseDto;
     }
@@ -126,7 +126,7 @@ public class MatchService {
                     .user(user)
                     .build());
 
-            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
+            notificationService.send(inviteRequestDto.getNickname(), "permit", authService.getUserByToken(token), match);
             requestUserListRepository.delete(requestUserList);
 
             messageRepository.save(Message.builder()
@@ -136,14 +136,9 @@ public class MatchService {
                     .type("enter")
                     .build());
 
-//            notificationService.deleteAlarm(match);
-
-
         } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
-            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
+            notificationService.send(inviteRequestDto.getNickname(), "deny", authService.getUserByToken(token), match);
             requestUserListRepository.delete(requestUserList);
-//            notificationService.deleteAlarm(match);
-
 
         } else {
             throw new IllegalArgumentException("이미 참여중인 회원입니다.");

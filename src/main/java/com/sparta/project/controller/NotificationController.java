@@ -14,13 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationController {
 
     private final NotificationService notificationService;
-    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+//    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
-    @CrossOrigin
-    @GetMapping(value = "/sub/{userId}", consumes = MediaType.ALL_VALUE)
-    public SseEmitter subscribe(@PathVariable Long userId) {
-        System.out.println(userId);
-        return notificationService.subscribe(userId);
+    @GetMapping(value = "/sub/{userId}", produces = "text/event-stream")
+    public SseEmitter subscribe(@PathVariable Long userId, @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId ) {
+        return notificationService.subscribe(userId, lastEventId);
     }
 
 }
