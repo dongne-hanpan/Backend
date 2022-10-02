@@ -98,6 +98,7 @@ public class UserService {
                             .sports(invitedUser.getMatch().getSports())
                             .writer(invitedUser.getMatch().getWriter())
                             .level_HOST(calculateService.calculateLevel(user))
+                                  //  .profileImage_HOST()
                             .matchStatus(invitedUser.getMatch().getMatchStatus())
                             .userListInMatch(userList)
                             .build());
@@ -158,17 +159,14 @@ public class UserService {
     }
 
     public List<CommentDto> showComment(String nickname) {
-        System.out.println(nickname);
         List<CommentDto> commentList = new ArrayList<>();
 
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(nickname)) {
-            User user = evaluation.getUser();
 
             commentList.add(CommentDto.builder()
                     .comment(evaluation.getComment())
-                    .mannerPoint(evaluation.getMannerPoint())
                     .nickname(nickname)
-                    .writer(user.getNickname())
+                    .writer(evaluation.getUser().getNickname())
                     .build());
         }
         return commentList;
