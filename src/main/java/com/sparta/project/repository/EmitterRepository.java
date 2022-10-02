@@ -12,7 +12,7 @@ public interface EmitterRepository {
 
     Map<String, SseEmitter> findAllEmitterStartWithById(String Id); //해당 회원과 관련된 모든 Emitter를 찾는다
 
-    Map<String, Object> findAllEventCacheStartWithById(String Id); //해당 회원과관련된 모든 이벤트를 찾는다
+    Map<String, Object> findAllEventCacheStartWithId(String Id); //해당 회원과관련된 모든 이벤트를 찾는다
 
     void deleteById(String id); //Emitter를 지운다
 

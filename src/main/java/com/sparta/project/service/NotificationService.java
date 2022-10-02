@@ -1,110 +1,118 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.message.Notification;
+import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Match;
 import com.sparta.project.entity.User;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.MediaType;
+
+import static com.sparta.project.controller.NotificationController.sseEmitters;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Log4j2
 @Service
 public class NotificationService {
 
-    private final EmitterRepository emitterRepository;
     private final UserRepository userRepository;
     private final CalculateService calculateService;
     private final BowlingRepository bowlingRepository;
+    private final MatchRepository matchRepository;
+    private final RequestUserListRepository requestUserListRepository;
 
-    public SseEmitter subscribe(Long userId, String lastEventId) {
+    public SseEmitter subscribe(Long userId) {
 
-        String emitterId  = userId + "_" + System.currentTimeMillis();
-
-        SseEmitter emitter;
-
-        if (emitterRepository.findAllEmitterStartWithById(userId.toString()) != null){
-            emitterRepository.deleteAllEmitterStartWithId(userId.toString());
-            emitter = emitterRepository.save(emitterId, new SseEmitter(Long.MAX_VALUE)); //emitterId = key, SseEmitter = value
-        }
-        else {
-            emitter = emitterRepository.save(emitterId, new SseEmitter(Long.MAX_VALUE));
-        }
-
-        emitter.onCompletion(() -> emitterRepository.deleteById(emitterId)); //네트워크 오류
-        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId)); //시간 초과
-        emitter.onError((e) -> emitterRepository.deleteById(emitterId)); //오류
-
-        String eventId = userId + "_" + System.currentTimeMillis();
-        sendNotification(emitter, eventId, emitterId, "EventStream Created. [userId=" + userId + "]");
-
-        if (!lastEventId.isEmpty()) {
-            Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithById(userId.toString());
-            eventCaches.entrySet().stream()
-                    .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-                    .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
-        }
-
-        return emitter;
-    }
-
-    private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {
+        SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
         try {
-            emitter.send(SseEmitter.event().id(eventId).name("connect").data(data, MediaType.APPLICATION_JSON));
-        } catch (IOException exception) {
-            emitterRepository.deleteById(emitterId);
-            emitter.completeWithError(exception);
+            // 연결!!
+            sseEmitter.send(SseEmitter.event().name("connect"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        sseEmitters.put(userId, sseEmitter);
+
+        sseEmitter.onCompletion(() -> sseEmitters.remove(userId));
+        sseEmitter.onTimeout(() -> sseEmitters.remove(userId));
+        sseEmitter.onError((e) -> sseEmitters.remove(userId));
+
+        return sseEmitter;
     }
+
 
     public void send(String receiver, String type, User user, Match match) {
 
         Notification notification = createNotification(receiver, type, user, match);
-        Long userId = userRepository.findByNickname(receiver).getId();
 
-        // 로그인 한 유저의 SseEmitter 모두 가져오기
-        Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithById(userId.toString());
+        Long receiverId = userRepository.findByNickname(receiver).getId();
 
-        sseEmitters.forEach(
-                (key, emitter) -> {
-                    // 데이터 캐시 저장(유실된 데이터 처리하기 위함)
-                    emitterRepository.saveEventCache(key, notification);
-                    // 데이터 전송
-                    sendToClient(emitter, key, notification);
-                }
-        );
-    }
+        if (sseEmitters.containsKey(receiverId)) {
+            SseEmitter sseEmitter = sseEmitters.get(receiverId);
 
-    private void sendToClient(SseEmitter emitter, String id, Object data) {
-
-        try {
-            emitter.send(SseEmitter.event()
-                    .id(id)
-                    .name("connect")
-                    .data(data, MediaType.APPLICATION_JSON));
-
-//                    .reconnectTime(0));
-//            emitter.complete();
-//            emitterRepository.deleteById(id);
-
-        } catch (Exception exception) {
-            emitterRepository.deleteById(id);
-            throw new IllegalArgumentException("Connection Error");
+            try {
+                assert notification != null;
+                sseEmitter.send(SseEmitter.event().name("connect").data(notification));
+            } catch (Exception e) {
+                sseEmitters.remove(receiverId);
+            }
         }
     }
 
+    public void showRequestUser(User receiver) {
+
+        if (sseEmitters.containsKey(receiver.getId())) {
+            SseEmitter sseEmitter = sseEmitters.get(receiver.getId());
+
+            List<Match> list = matchRepository.findAllByWriter(receiver.getNickname());
+
+            List<Notification> userList = new ArrayList<>();
+
+            if (list.size() != 0) {
+                for (Match match : list) {
+                    for (int i = 0; i < requestUserListRepository.findAllByMatch(match).size(); i++) {
+                        User user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
+
+                        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
+                        userList.add(Notification.builder()
+                                .alarmType("apply")
+                                .receiver(receiver.getNickname())
+                                .match_id(match.getId())
+                                .sender(user.getNickname())
+                                .sender_ProfileImage(user.getProfileImage())
+                                .sender_AverageScore(calculateService.calculateAverageScore(user))
+                                .sender_Level(calculateService.calculateLevel(user))
+                                .sender_MannerPoint(calculateService.calculateMannerPoint(user))
+                                .sender_MatchCnt(bowling.size())
+                                .build()
+                        );
+                    }
+                }
+            }
+
+            try {
+                sseEmitter.send(SseEmitter.event().name("connect").data(userList));
+            } catch (Exception e) {
+                sseEmitters.remove(receiver.getId());
+            }
+
+        }
+    }
+
+
     private Notification createNotification(String receiver, String type, User user, Match match) {
 
-        if (type.equals("apply")){
+        if (type.equals("apply")) {
             List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
             return Notification.builder()
@@ -119,9 +127,8 @@ public class NotificationService {
                     .sender_MannerPoint(calculateService.calculateMannerPoint(user))
                     .sender_MatchCnt(bowling.size())
                     .build();
-        }
 
-        else if (type.equals("permit")) {
+        } else if (type.equals("permit")) {
             return Notification.builder()
                     .receiver(receiver)
                     .alarmType(type)
@@ -131,18 +138,16 @@ public class NotificationService {
                     .sender(user.getNickname())
                     .sender_ProfileImage(user.getProfileImage())
                     .build();
-        }
 
-        else if (type.equals("deny")) {
+        } else if (type.equals("deny")) {
             return Notification.builder()
                     .receiver(receiver)
                     .alarmType(type)
                     .isRead(false)
                     .match_id(match.getId())
+                    .match_date(match.getDate())
                     .build();
-        }
-
-        else {
+        } else {
             return null;
         }
     }

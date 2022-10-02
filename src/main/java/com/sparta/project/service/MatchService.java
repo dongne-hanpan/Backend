@@ -34,6 +34,7 @@ public class MatchService {
     //게시글 작성
     public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
 
+        System.out.println(token);
         User user = authService.getUserByToken(token);
 
         matchRequestDto.setWriter(user.getNickname());
@@ -145,32 +146,11 @@ public class MatchService {
         }
     }
 
-    public List<InviteResponseDto> showRequestUserList(String token) {
+    public void showRequestUserList(String token) {
 
         User user = authService.getUserByToken(token);
 
-        List<Match> list = matchRepository.findAllByWriter(user.getNickname());
-
-        List<InviteResponseDto> userList = new ArrayList<>();
-
-        if (list.size() != 0) {
-            for (Match match : list) {
-                for (int i = 0; i < requestUserListRepository.findAllByMatch(match).size(); i++) {
-                    user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
-                    userList.add(InviteResponseDto.builder()
-                            .match_id(match.getId())
-                            .nickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname())
-                            .userLevel(calculateService.calculateLevel(user))
-                            .mannerPoint(calculateService.calculateMannerPoint(user))
-                            .profileImage(user.getProfileImage())
-                            .build()
-                    );
-                }
-            }
-        } else {
-            return null;
-        }
-        return userList;
+        notificationService.showRequestUser(user);
 
     }
 
