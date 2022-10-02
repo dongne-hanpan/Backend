@@ -75,8 +75,6 @@ public class AuthService {
                 .build();
     }
 
-
-
     @Transactional
     public void logout(String token) {
         User user = getUserByToken(token);
@@ -84,7 +82,6 @@ public class AuthService {
     }
 
     public User getUserByToken(String token) {
-
         Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
         Long user_id = Long.parseLong(authentication.getName());
         return userRepository.findById(user_id).orElseThrow(() ->
@@ -105,23 +102,19 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponseDto reissue(TokenRequestDto tokenRequestDto) {
+    public LoginResponseDto reissue(String token) {
 
-        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+        Authentication authentication = tokenProvider.getAuthentication(token.substring(7));
+
+        User user = userRepository.findById(Long.parseLong(authentication.getName())).orElseThrow();
 
         RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("로그아웃 된 사용자입니다."));
-
-        if (!tokenProvider.validateToken(refreshToken.toString())) {
-            throw new IllegalArgumentException("Refresh Token 이 유효하지 않습니다.");
-        }
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
         RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
         refreshTokenRepository.save(newRefreshToken);
-
-        User user = getUserByToken(tokenDto.getAccessToken());
 
         return LoginResponseDto.builder()
                 .grantType(tokenDto.getGrantType())

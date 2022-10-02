@@ -22,7 +22,6 @@ public class AuthController {
     public void signup(@RequestBody UserRequestDto userRequestDto) {
         ResponseEntity.ok(authService.signup(userRequestDto));
     }
-
     @GetMapping("/username/{username}")
     public boolean existUsername(@PathVariable String username) {
         return !userRepository.existsByUsername(username);
@@ -37,17 +36,15 @@ public class AuthController {
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(authService.login(loginRequestDto));
     }
-
     @GetMapping("/logout")
     public void logOut(@RequestHeader(value = "Authorization") String token) {
         authService.logout(token);
     }
 
-    @PostMapping("/reissue")
-    public ResponseEntity<LoginResponseDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
-        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
+    @GetMapping("/reissue")
+    public ResponseEntity<LoginResponseDto> reissue(@RequestHeader(value = "Authorization") String token) {
+        return ResponseEntity.ok(authService.reissue(token));
     }
-
     @GetMapping("/refresh")
     public LoginResponseDto refreshUserInfo(@RequestHeader(value = "Authorization") String token) {
         return authService.refreshUserInfo(token);
