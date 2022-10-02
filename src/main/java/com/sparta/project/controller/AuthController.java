@@ -1,5 +1,7 @@
 package com.sparta.project.controller;
 
+import com.sparta.project.dto.token.TokenDto;
+import com.sparta.project.dto.token.TokenRequestDto;
 import com.sparta.project.dto.user.LoginRequestDto;
 import com.sparta.project.dto.user.LoginResponseDto;
 import com.sparta.project.dto.user.UserRequestDto;
@@ -41,10 +43,10 @@ public class AuthController {
         authService.logout(token);
     }
 
-//    @PostMapping("/reissue")
-//    public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
-//        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
-//    }
+    @PostMapping("/reissue")
+    public ResponseEntity<LoginResponseDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
+    }
 
     @GetMapping("/refresh")
     public LoginResponseDto refreshUserInfo(@RequestHeader(value = "Authorization") String token) {
