@@ -36,8 +36,6 @@ import java.util.UUID;
 public class KakaoUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthService authService;
     private final CalculateService calculateService;
 
@@ -52,25 +50,16 @@ public class KakaoUserService {
         // 3. "카카오 사용자 정보"로 필요시 회원가입
         User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
-        // 4. 3단계에서 DB 중복검사가 된 유저 정보로 토큰 생성해서 dto에 담아서 retyrn
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(kakaoUser.getUsername(), kakaoUser.getPassword());
-
-        //현재 로그인된 사람의 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-
-        refreshTokenRepository.save(RefreshToken.builder()
-                .key(kakaoUser.getId().toString())
-                .value(tokenDto.getRefreshToken())
+        LoginResponseDto loginResponseDto = authService.login(LoginRequestDto.builder()
+                .username(kakaoUserInfo.getId().toString())
+                .password(kakaoUserInfo.getId() + "sparta")
                 .build());
 
         return KakaoLoginResponseDto.builder()
-                .grantType(tokenDto.getGrantType())
-                .accessToken(tokenDto.getAccessToken())
+                .grantType(loginResponseDto.getGrantType())
+                .accessToken(loginResponseDto.getAccessToken())
                 .username(kakaoUser.getUsername())
                 .nickname(kakaoUser.getNickname())
-                .KakaoId(kakaoUser.getKakaoId())
                 .mannerPoint(calculateService.calculateMannerPoint(kakaoUser))
                 .profileImage(kakaoUser.getProfileImage())
                 .build();
@@ -139,20 +128,18 @@ public class KakaoUserService {
     }
 
     private User registerKakaoUserIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
-        Long kakaoId = kakaoUserInfo.getId();
-        User kakaoUser = userRepository.findByKakaoId(kakaoId)
+        String kakaoId = kakaoUserInfo.getId().toString();
+        User kakaoUser = userRepository.findByUsername(kakaoId)
                 .orElse(null);
         if (kakaoUser == null) {
 
             return userRepository.save(User.builder()
-                    .username(UUID.randomUUID().toString())
+                    .username(kakaoId)
                     .nickname(kakaoUserInfo.getNickname())
-                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .password(passwordEncoder.encode(kakaoUserInfo.getId() + "sparta"))
                     .authority(Authority.ROLE_USER)
-                    .kakaoId(kakaoId)
                     .thumbnailImage(kakaoUserInfo.getThumbnailImage())
                     .build());
-
         }
         return kakaoUser;
 
