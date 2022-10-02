@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,12 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationController {
 
     private final NotificationService notificationService;
-//    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
-    @GetMapping(value = "/sub/{userId}", produces = "text/event-stream")
-    public SseEmitter subscribe(@PathVariable Long userId, @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId ) {
-        return notificationService.subscribe(userId, lastEventId);
+    @GetMapping(value = "/sub/{id}", consumes = MediaType.ALL_VALUE)
+    public SseEmitter subscribe(@PathVariable Long id) {
+        return notificationService.subscribe(id);
     }
-
 }
-//@RequestHeader(value = "Authorization") String token
