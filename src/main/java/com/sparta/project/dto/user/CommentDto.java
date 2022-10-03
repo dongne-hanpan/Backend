@@ -9,8 +9,6 @@ public class CommentDto {
 
     private String comment;
     private String nickname;
+    private String profileImage;
     private String writer;
-    private double mannerPoint;
-
-
 }

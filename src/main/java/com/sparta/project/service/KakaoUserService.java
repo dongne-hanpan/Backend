@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.project.dto.token.TokenDto;
 import com.sparta.project.dto.user.KakaoLoginResponseDto;
 import com.sparta.project.dto.user.KakaoUserInfoDto;
+import com.sparta.project.dto.user.LoginRequestDto;
+import com.sparta.project.dto.user.LoginResponseDto;
 import com.sparta.project.entity.Authority;
 import com.sparta.project.entity.RefreshToken;
 import com.sparta.project.entity.User;
@@ -34,11 +36,10 @@ import java.util.UUID;
 public class KakaoUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-
+    private final AuthService authService;
     private final CalculateService calculateService;
-    public KakaoLoginResponseDto kakaoLogin(String code) throws JsonProcessingException, UnsupportedEncodingException {
+
+    public KakaoLoginResponseDto kakaoLogin(String code) throws JsonProcessingException {
 
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getAccessToken(code);
@@ -49,31 +50,20 @@ public class KakaoUserService {
         // 3. "카카오 사용자 정보"로 필요시 회원가입
         User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
-        // 4. 3단계에서 DB 중복검사가 된 유저 정보로 토큰 생성해서 dto에 담아서 retyrn
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(kakaoUser.getUsername(), kakaoUser.getPassword());
-
-        //현재 로그인된 사람의 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-
-        refreshTokenRepository.save(RefreshToken.builder()
-                .key(authentication.getName())
-                .value(tokenDto.getRefreshToken())
+        LoginResponseDto loginResponseDto = authService.login(LoginRequestDto.builder()
+                .username(kakaoUserInfo.getId().toString())
+                .password(kakaoUserInfo.getId() + "sparta")
                 .build());
 
         return KakaoLoginResponseDto.builder()
-                .grantType(tokenDto.getGrantType())
-                .accessToken(tokenDto.getAccessToken())
+                .grantType(loginResponseDto.getGrantType())
+                .accessToken(loginResponseDto.getAccessToken())
                 .username(kakaoUser.getUsername())
                 .nickname(kakaoUser.getNickname())
-                .KakaoId(kakaoUser.getKakaoId())
                 .mannerPoint(calculateService.calculateMannerPoint(kakaoUser))
-                .profileImage(null)
+                .profileImage(kakaoUser.getProfileImage())
                 .build();
 
-        // 4. 강제 로그인 처리
-//        forceLogin(kakaoUser);
     }
 
     private String getAccessToken(String code) throws JsonProcessingException {
@@ -84,8 +74,8 @@ public class KakaoUserService {
         // HTTP Body 생성
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "7865af779df1a9975124d3cd86d9a5d4");
-        body.add("redirect_uri", "http://3.38.191.6/user/kakao/callback");
+        body.add("client_id", "c22ca4a980d7fc2f620f5b8a0a37e820");
+        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -107,7 +97,7 @@ public class KakaoUserService {
         return jsonNode.get("access_token").asText();
     }
 
-    private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException, UnsupportedEncodingException {
+    private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -138,23 +128,18 @@ public class KakaoUserService {
     }
 
     private User registerKakaoUserIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
-        // DB 에 중복된 Kakao Id 가 있는지 확인
-        Long kakaoId = kakaoUserInfo.getId();
-        User kakaoUser = userRepository.findByKakaoId(kakaoId)
+        String kakaoId = kakaoUserInfo.getId().toString();
+        User kakaoUser = userRepository.findByUsername(kakaoId)
                 .orElse(null);
         if (kakaoUser == null) {
-            // 회원가입
-            // username: kakao nickname
 
             return userRepository.save(User.builder()
-                    .username(UUID.randomUUID().toString())
+                    .username(kakaoId)
                     .nickname(kakaoUserInfo.getNickname())
-                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .password(passwordEncoder.encode(kakaoUserInfo.getId() + "sparta"))
                     .authority(Authority.ROLE_USER)
-                    .kakaoId(kakaoId)
                     .thumbnailImage(kakaoUserInfo.getThumbnailImage())
                     .build());
-
         }
         return kakaoUser;
 

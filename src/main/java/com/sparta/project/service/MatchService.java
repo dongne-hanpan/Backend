@@ -34,6 +34,7 @@ public class MatchService {
     //게시글 작성
     public List<MatchResponseDto> createMatch(MatchRequestDto matchRequestDto, String token) {
 
+        System.out.println(token);
         User user = authService.getUserByToken(token);
 
         matchRequestDto.setWriter(user.getNickname());
@@ -98,7 +99,7 @@ public class MatchService {
         RequestUserList requestUserList = new RequestUserList(inviteResponseDto, match);
         requestUserListRepository.save(requestUserList);
 
-//        notificationService.showRequestUser(match_id, user.getId());
+        notificationService.send(match.getWriter(), "apply", user, match);
 
         return inviteResponseDto;
     }
@@ -126,7 +127,7 @@ public class MatchService {
                     .user(user)
                     .build());
 
-            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
+            notificationService.send(inviteRequestDto.getNickname(), "permit", authService.getUserByToken(token), match);
             requestUserListRepository.delete(requestUserList);
 
             messageRepository.save(Message.builder()
@@ -136,46 +137,20 @@ public class MatchService {
                     .type("enter")
                     .build());
 
-//            notificationService.deleteAlarm(match);
-
-
         } else if (!userListInMatchRepository.existsByMatchAndUser(match, user)) {
-            notificationService.answerRequest(user, match, inviteRequestDto.isPermit());
+            notificationService.send(inviteRequestDto.getNickname(), "deny", authService.getUserByToken(token), match);
             requestUserListRepository.delete(requestUserList);
-//            notificationService.deleteAlarm(match);
-
 
         } else {
             throw new IllegalArgumentException("이미 참여중인 회원입니다.");
         }
     }
 
-    public List<InviteResponseDto> showRequestUserList(String token) {
+    public void showRequestUserList(String token) {
 
         User user = authService.getUserByToken(token);
 
-        List<Match> list = matchRepository.findAllByWriter(user.getNickname());
-
-        List<InviteResponseDto> userList = new ArrayList<>();
-
-        if (list.size() != 0) {
-            for (Match match : list) {
-                for (int i = 0; i < requestUserListRepository.findAllByMatch(match).size(); i++) {
-                    user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
-                    userList.add(InviteResponseDto.builder()
-                            .match_id(match.getId())
-                            .nickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname())
-                            .userLevel(calculateService.calculateLevel(user))
-                            .mannerPoint(calculateService.calculateMannerPoint(user))
-                            .profileImage(user.getProfileImage())
-                            .build()
-                    );
-                }
-            }
-        } else {
-            return null;
-        }
-        return userList;
+        notificationService.showRequestUser(user);
 
     }
 
@@ -325,11 +300,40 @@ public class MatchService {
                         .sports(match.getSports())
                         .matchStatus(match.getMatchStatus())
                         .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
+                        .matchCnt_HOST(bowlingRepository.findAllByUser(userRepository.findByNickname(match.getWriter())).size())
+                        .averageScore_HOST(calculateService.calculateAverageScore(userRepository.findByNickname(match.getWriter())))
                         .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
                         .matchIntakeFull(match.getMatchIntakeFull())
                         .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
                         .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
                         .userListInMatch(userList)
+                        .build());
+            }
+        }
+        return matchResponseDto;
+    }
+
+    public List<MatchResponseDto> reservedMatch(String token) {
+
+        User user = authService.getUserByToken(token);
+
+        List<UserListInMatch> matches = userListInMatchRepository.findAllByUser(user);
+        List<MatchResponseDto> matchResponseDto = new ArrayList<>();
+
+        for (UserListInMatch match : matches) {
+            if (match.getMatch().getMatchStatus().equals("reserved")) {
+                matchResponseDto.add(MatchResponseDto.builder()
+                        .match_id(match.getMatch().getId())
+                        .date(match.getMatch().getDate())
+                        .place(match.getMatch().getPlace())
+                        .placeDetail(match.getMatch().getPlaceDetail())
+                        .time(match.getMatch().getTime())
+                        .writer(match.getMatch().getWriter())
+                        .profileImage_HOST(userRepository.findByNickname(match.getMatch().getWriter()).getProfileImage())
+                        .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getMatch().getWriter())))
+                        .averageScore_HOST(calculateService.calculateAverageScore(userRepository.findByNickname(match.getMatch().getWriter())))
+                        .matchCnt_HOST(bowlingRepository.findAllByUser(userRepository.findByNickname(match.getMatch().getWriter())).size())
+                        .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getMatch().getWriter())))
                         .build());
             }
         }

@@ -1,173 +1,154 @@
 package com.sparta.project.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
-import com.sparta.project.dto.user.InviteRequestReturnMessageDto;
+import com.sparta.project.dto.message.Notification;
 import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Match;
-import com.sparta.project.entity.RequestUserList;
 import com.sparta.project.entity.User;
-import com.sparta.project.repository.BowlingRepository;
-import com.sparta.project.repository.MatchRepository;
-import com.sparta.project.repository.RequestUserListRepository;
-import com.sparta.project.repository.UserRepository;
+import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import static com.sparta.project.controller.NotificationController.sseEmitters;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import static com.sparta.project.controller.NotificationController.sseEmitters;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
+@Log4j2
 @Service
 public class NotificationService {
-    private final MatchRepository matchRepository;
+
     private final UserRepository userRepository;
-    private final AuthService authService;
-    private final BowlingRepository bowlingRepository;
     private final CalculateService calculateService;
+    private final BowlingRepository bowlingRepository;
+    private final MatchRepository matchRepository;
     private final RequestUserListRepository requestUserListRepository;
 
     public SseEmitter subscribe(Long userId) {
 
-        User user = userRepository.findById(userId).orElseThrow();
-
-        List<Match> matches = matchRepository.findAllByWriter(user.getNickname());
-        List<InviteResponseDto> userList = new ArrayList<>();
-
-        for (Match match : matches) {
-            List<RequestUserList> lists = requestUserListRepository.findAllByMatch(match);
-            for (RequestUserList requestUserList : lists) {
-                userList.add(InviteResponseDto.builder()
-                        .match_id(match.getId())
-                        .nickname(requestUserList.getNickname())
-                        .userLevel(calculateService.calculateLevel(user))
-                        .mannerPoint(calculateService.calculateMannerPoint(user))
-                        .profileImage(user.getProfileImage())
-                        .build());
-            }
-        }
-
-        // 현재 클라이언트를 위한 SseEmitter 생성
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
         try {
             // 연결!!
-            sseEmitter.send(SseEmitter.event().name("connect").data(userList));
+            sseEmitter.send(SseEmitter.event().name("connect"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // user의 pk값을 key값으로 해서 SseEmitter를 저장
-        sseEmitters.put(user.getId(), sseEmitter);
+        sseEmitters.put(userId, sseEmitter);
 
-        sseEmitter.onCompletion(() -> sseEmitters.remove(user.getId()));
-        sseEmitter.onTimeout(() -> sseEmitters.remove(user.getId()));
-        sseEmitter.onError((e) -> sseEmitters.remove(user.getId()));
+        sseEmitter.onCompletion(() -> sseEmitters.remove(userId));
+        sseEmitter.onTimeout(() -> sseEmitters.remove(userId));
+        sseEmitter.onError((e) -> sseEmitters.remove(userId));
 
         return sseEmitter;
     }
 
-    public void showRequestUser(Long match_id, Long currentUserId) {
 
-        Match match = matchRepository.findById(match_id).orElseThrow(() -> new NotFoundException("게시물이 존재하지 않습니다."));
-        User user = userRepository.findByNickname(match.getWriter());
-        Long userId = user.getId();
+    public void send(String receiver, String type, User user, Match match) {
 
-        if (sseEmitters.containsKey(userId) && !Objects.equals(userId, currentUserId)) {
-            SseEmitter sseEmitter = sseEmitters.get(userId);
+        Notification notification = createNotification(receiver, type, user, match);
 
-            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+        Long receiverId = userRepository.findByNickname(receiver).getId();
 
-            user = userRepository.findById(currentUserId).orElseThrow();
-            InviteResponseDto inviteResponseDto = InviteResponseDto.builder()
-                    .averageScore(calculateService.calculateAverageScore(user))
-                    .mannerPoint(calculateService.calculateMannerPoint(user))
-                    .match_id(match_id)
-                    .matchCount(bowling.size())
-                    .nickname(user.getNickname())
-                    .userLevel(calculateService.calculateLevel(user))
-                    .profileImage(user.getProfileImage())
-                    .build();
+        if (sseEmitters.containsKey(receiverId)) {
+            SseEmitter sseEmitter = sseEmitters.get(receiverId);
 
             try {
-                sseEmitter.send(SseEmitter.event().name("request").data(inviteResponseDto));
+                assert notification != null;
+                sseEmitter.send(SseEmitter.event().name("connect").data(notification));
             } catch (Exception e) {
-                sseEmitters.remove(user.getId());
+                sseEmitters.remove(receiverId);
             }
         }
     }
 
-    public void answerRequest(User user, Match match, boolean permit) {
-        Long userId = user.getId(); // 알림 받는 사람 (매치에 신청한 사람)
+    public void showRequestUser(User receiver) {
 
-        if (sseEmitters.containsKey(userId)) {
-            SseEmitter sseEmitter = sseEmitters.get(userId);
+        if (sseEmitters.containsKey(receiver.getId())) {
+            SseEmitter sseEmitter = sseEmitters.get(receiver.getId());
 
-            if (permit) {
-                InviteRequestReturnMessageDto returnMessageDto = InviteRequestReturnMessageDto.builder()
-                        .date(match.getDate())
-                        .time(match.getTime())
-                        .place(match.getPlace())
-                        .hostNickname(match.getWriter())
-                        .match_id(match.getId())
-                        .profileImage(userRepository.findByNickname(match.getWriter()).getProfileImage())
-                        .returnMessage("신청이 수락되었습니다.")
-                        .build();
+            List<Match> list = matchRepository.findAllByWriter(receiver.getNickname());
 
-                try {
-                    sseEmitter.send(SseEmitter.event().name("message").data(returnMessageDto));
-                } catch (Exception e) {
-                    e.printStackTrace();
+            List<Notification> userList = new ArrayList<>();
+
+            if (list.size() != 0) {
+                for (Match match : list) {
+                    for (int i = 0; i < requestUserListRepository.findAllByMatch(match).size(); i++) {
+                        User user = userRepository.findByNickname(requestUserListRepository.findAllByMatch(match).get(i).getNickname());
+
+                        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
+                        userList.add(Notification.builder()
+                                .alarmType("apply")
+                                .receiver(receiver.getNickname())
+                                .match_id(match.getId())
+                                .sender(user.getNickname())
+                                .sender_ProfileImage(user.getProfileImage())
+                                .sender_AverageScore(calculateService.calculateAverageScore(user))
+                                .sender_Level(calculateService.calculateLevel(user))
+                                .sender_MannerPoint(calculateService.calculateMannerPoint(user))
+                                .sender_MatchCnt(bowling.size())
+                                .build()
+                        );
+                    }
                 }
-            } else {
-                InviteRequestReturnMessageDto returnMessageDto = InviteRequestReturnMessageDto.builder()
-                        .date(match.getDate())
-                        .time(match.getTime())
-                        .place(match.getPlace())
-                        .hostNickname(match.getWriter())
-                        .match_id(match.getId())
-                        .profileImage(userRepository.findByNickname(match.getWriter()).getProfileImage())
-                        .returnMessage("신청이 거절되었습니다.")
-                        .build();
-
-                try {
-                    sseEmitter.send(SseEmitter.event().name("message").data(returnMessageDto));
-                } catch (Exception e) {
-                    sseEmitters.remove(userId);
-                }
-
             }
 
-        }
-    }
-
-    public void deleteAlarm(Match match) {
-
-        User user = userRepository.findByNickname(match.getWriter());
-        List<InviteResponseDto> userList = new ArrayList<>();
-
-        List<RequestUserList> lists = requestUserListRepository.findAllByMatch(match);
-        for (RequestUserList requestUserList : lists) {
-            userList.add(InviteResponseDto.builder()
-                    .match_id(match.getId())
-                    .nickname(requestUserList.getNickname())
-                    .userLevel(calculateService.calculateLevel(user))
-                    .mannerPoint(calculateService.calculateMannerPoint(user))
-                    .profileImage(user.getProfileImage())
-                    .build());
-        }
-
-        if (sseEmitters.containsKey(user.getId())) {
-            SseEmitter sseEmitter = sseEmitters.get(user.getId());
             try {
                 sseEmitter.send(SseEmitter.event().name("connect").data(userList));
             } catch (Exception e) {
-                sseEmitters.remove(user.getId());
+                sseEmitters.remove(receiver.getId());
             }
+
+        }
+    }
+
+
+    private Notification createNotification(String receiver, String type, User user, Match match) {
+
+        if (type.equals("apply")) {
+            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
+            return Notification.builder()
+                    .receiver(receiver)
+                    .alarmType(type)
+                    .isRead(false)
+                    .match_id(match.getId())
+                    .sender(user.getNickname())
+                    .sender_ProfileImage(user.getProfileImage())
+                    .sender_AverageScore(calculateService.calculateAverageScore(user))
+                    .sender_Level(calculateService.calculateLevel(user))
+                    .sender_MannerPoint(calculateService.calculateMannerPoint(user))
+                    .sender_MatchCnt(bowling.size())
+                    .build();
+
+        } else if (type.equals("permit")) {
+            return Notification.builder()
+                    .receiver(receiver)
+                    .alarmType(type)
+                    .isRead(false)
+                    .match_id(match.getId())
+                    .match_date(match.getDate())
+                    .sender(user.getNickname())
+                    .sender_ProfileImage(user.getProfileImage())
+                    .build();
+
+        } else if (type.equals("deny")) {
+            return Notification.builder()
+                    .receiver(receiver)
+                    .alarmType(type)
+                    .isRead(false)
+                    .match_id(match.getId())
+                    .match_date(match.getDate())
+                    .build();
+        } else {
+            return null;
         }
     }
 }

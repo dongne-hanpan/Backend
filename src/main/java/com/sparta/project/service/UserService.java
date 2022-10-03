@@ -71,6 +71,8 @@ public class UserService {
 
         User user = authService.getUserByToken(token);
 
+        List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
         // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
             List<MatchResponseDto> list = new ArrayList<>();
@@ -98,11 +100,15 @@ public class UserService {
                             .sports(invitedUser.getMatch().getSports())
                             .writer(invitedUser.getMatch().getWriter())
                             .level_HOST(calculateService.calculateLevel(user))
+                            .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(invitedUser.getMatch().getWriter())))
+                            .profileImage_HOST(userRepository.findByNickname(invitedUser.getMatch().getWriter()).getProfileImage())
                             .matchStatus(invitedUser.getMatch().getMatchStatus())
                             .userListInMatch(userList)
+                            .matchCnt_HOST(bowling.size())
+                            .averageScore_HOST(calculateService.calculateAverageScore(userRepository.findByNickname(invitedUser.getMatch().getWriter())))
                             .build());
             }
-            List<Bowling> bowling = bowlingRepository.findAllByUser(user);
+
 
             return MyPageResponseDto.builder()
                     .nickname(user.getNickname())
@@ -158,17 +164,14 @@ public class UserService {
     }
 
     public List<CommentDto> showComment(String nickname) {
-        System.out.println(nickname);
         List<CommentDto> commentList = new ArrayList<>();
 
         for (Evaluation evaluation : evaluationRepository.findAllByNickname(nickname)) {
-            User user = evaluation.getUser();
 
             commentList.add(CommentDto.builder()
                     .comment(evaluation.getComment())
-                    .mannerPoint(evaluation.getMannerPoint())
                     .nickname(nickname)
-                    .writer(user.getNickname())
+                    .writer(evaluation.getUser().getNickname())
                     .build());
         }
         return commentList;

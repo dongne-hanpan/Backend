@@ -20,7 +20,7 @@ public class MatchController {
 
     @GetMapping("/list/{region}/{sports}")
     private List<MatchResponseDto> getMatchList(@PathVariable Long region, @PathVariable String sports) {
-       return matchService.getMatchList(region, sports);
+        return matchService.getMatchList(region, sports);
     }
 
     @GetMapping("/list/{sports}")
@@ -35,8 +35,8 @@ public class MatchController {
 
     @PutMapping("/update/{match_id}")
     private MatchRequestDto updateMatch(@PathVariable Long match_id, @RequestBody MatchRequestDto matchRequestDto, @RequestHeader(value = "Authorization") String token) {
-            matchService.updateMatch(match_id, matchRequestDto, token);
-            return matchRequestDto;
+        matchService.updateMatch(match_id, matchRequestDto, token);
+        return matchRequestDto;
     }
 
     @DeleteMapping("/delete/{match_id}")
@@ -58,8 +58,8 @@ public class MatchController {
 
     //신청 유저 목록 매치별로 보여주기
     @GetMapping("/request")
-    private List<InviteResponseDto> requestUserList(@RequestHeader(value = "Authorization") String token) {
-        return matchService.showRequestUserList(token);
+    private void requestUserList(@RequestHeader(value = "Authorization") String token) {
+        matchService.showRequestUserList(token);
     }
 
     @GetMapping("/match-status-reserved/{match_id}")
@@ -81,4 +81,9 @@ public class MatchController {
     private String cancelMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.cancelMatch(match_id, token);
     }
+
+    @GetMapping("/reserved-match")
+        private List<MatchResponseDto> reservedMatch(@RequestHeader(value = "Authorization") String token) {
+           return matchService.reservedMatch(token);
+        }
 }

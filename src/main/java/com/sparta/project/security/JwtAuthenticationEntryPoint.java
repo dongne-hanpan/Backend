@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -25,9 +27,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        response.getWriter().println("\"message\" : \"로그인 시간이 만료되었습니다." + "\""
-                + "\n" + "\"statusCode\" : \"" + "401" + "\""
-        );
+        response.getWriter().println("{\"statusCode\" : \"" + "401" + "\"}");
     }
 
 }
