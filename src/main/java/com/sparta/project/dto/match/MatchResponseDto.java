@@ -21,6 +21,8 @@ public class MatchResponseDto {
     private Long matchIntakeCnt;
     private Long matchIntakeFull;
     private String profileImage_HOST;
+    private int matchCnt_HOST;
+    private Long averageScore_HOST;
     private double mannerPoint_HOST;
     private String level_HOST;
     private String matchStatus;

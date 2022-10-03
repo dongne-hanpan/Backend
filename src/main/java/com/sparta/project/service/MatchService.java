@@ -300,11 +300,40 @@ public class MatchService {
                         .sports(match.getSports())
                         .matchStatus(match.getMatchStatus())
                         .profileImage_HOST(userRepository.findByNickname(match.getWriter()).getProfileImage())
+                        .matchCnt_HOST(bowlingRepository.findAllByUser(userRepository.findByNickname(match.getWriter())).size())
+                        .averageScore_HOST(calculateService.calculateAverageScore(userRepository.findByNickname(match.getWriter())))
                         .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getWriter())))
                         .matchIntakeFull(match.getMatchIntakeFull())
                         .matchIntakeCnt(userListInMatchRepository.countByMatch(match))
                         .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getWriter())))
                         .userListInMatch(userList)
+                        .build());
+            }
+        }
+        return matchResponseDto;
+    }
+
+    public List<MatchResponseDto> reservedMatch(String token) {
+
+        User user = authService.getUserByToken(token);
+
+        List<UserListInMatch> matches = userListInMatchRepository.findAllByUser(user);
+        List<MatchResponseDto> matchResponseDto = new ArrayList<>();
+
+        for (UserListInMatch match : matches) {
+            if (match.getMatch().getMatchStatus().equals("reserved")) {
+                matchResponseDto.add(MatchResponseDto.builder()
+                        .match_id(match.getMatch().getId())
+                        .date(match.getMatch().getDate())
+                        .place(match.getMatch().getPlace())
+                        .placeDetail(match.getMatch().getPlaceDetail())
+                        .time(match.getMatch().getTime())
+                        .writer(match.getMatch().getWriter())
+                        .profileImage_HOST(userRepository.findByNickname(match.getMatch().getWriter()).getProfileImage())
+                        .mannerPoint_HOST(calculateService.calculateMannerPoint(userRepository.findByNickname(match.getMatch().getWriter())))
+                        .averageScore_HOST(calculateService.calculateAverageScore(userRepository.findByNickname(match.getMatch().getWriter())))
+                        .matchCnt_HOST(bowlingRepository.findAllByUser(userRepository.findByNickname(match.getMatch().getWriter())).size())
+                        .level_HOST(calculateService.calculateLevel(userRepository.findByNickname(match.getMatch().getWriter())))
                         .build());
             }
         }

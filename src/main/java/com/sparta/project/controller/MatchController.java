@@ -81,4 +81,9 @@ public class MatchController {
     private String cancelMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.cancelMatch(match_id, token);
     }
+
+    @GetMapping("/reserved-match")
+        private List<MatchResponseDto> reservedMatch(@RequestHeader(value = "Authorization") String token) {
+           return matchService.reservedMatch(token);
+        }
 }
