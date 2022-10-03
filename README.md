@@ -1,11 +1,13 @@
 # 프로젝트 소개
+
+ ![image](https://user-images.githubusercontent.com/86644517/193550533-404b8fd0-04f9-487f-94e5-cde79be719ad.png)
+ 
+ ---
+
 스파르타 코딩캠프 6주간 진행되는 [동네한판] 프로젝트 Server GitHub 입니다.
 
 - 개발 인원 : 3명
 - 개발 기간 : 2022.08.26 ~
- ![image](https://user-images.githubusercontent.com/86644517/193550533-404b8fd0-04f9-487f-94e5-cde79be719ad.png)
----
-
 - 주요 기능 : 
   - Jwt 통한 로그인/회원가입
   - CRUD 기능
