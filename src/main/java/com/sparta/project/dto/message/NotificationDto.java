@@ -1,15 +1,11 @@
 package com.sparta.project.dto.message;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Builder
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-public class Notification {
+public class NotificationDto {
 
     private String receiver;
 
@@ -28,3 +24,4 @@ public class Notification {
     private int sender_MatchCnt;
 
 }
+

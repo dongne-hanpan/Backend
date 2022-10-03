@@ -73,7 +73,6 @@ public class UserService {
 
         List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
-        // 마이페이지 - 볼링
         if (sports.equals("bowling")) {
             List<MatchResponseDto> list = new ArrayList<>();
             for (UserListInMatch invitedUser : userListInMatchRepository.findAllByUser(user)) {

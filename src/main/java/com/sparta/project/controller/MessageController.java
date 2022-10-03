@@ -21,14 +21,12 @@ public class MessageController {
     private final MessageService messageService;
     private final SimpMessageSendingOperations messagingTemplate;
 
-    //메세지 보내기
     @MessageMapping("/chat/{match_id}")
     public void message(@RequestBody ChatMessageDto chatMessageDto, @DestinationVariable Long match_id, @Header(value = "Authorization") String token) {
         messageService.messageSender(chatMessageDto, match_id, token);
         messagingTemplate.convertAndSend("/queue/match/" + match_id, chatMessageDto);
     }
 
-    //메세지 채팅방에 뿌려주기
     @ResponseBody
     @GetMapping("/chat/message/{match_id}")
     public List<ChatMessageDto> showMessage(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {

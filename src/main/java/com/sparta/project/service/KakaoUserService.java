@@ -41,13 +41,8 @@ public class KakaoUserService {
 
     public KakaoLoginResponseDto kakaoLogin(String code) throws JsonProcessingException {
 
-        // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getAccessToken(code);
-
-        // 2. "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
         KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(accessToken);
-
-        // 3. "카카오 사용자 정보"로 필요시 회원가입
         User kakaoUser = registerKakaoUserIfNeeded(kakaoUserInfo);
 
         LoginResponseDto loginResponseDto = authService.login(LoginRequestDto.builder()
@@ -67,18 +62,15 @@ public class KakaoUserService {
     }
 
     private String getAccessToken(String code) throws JsonProcessingException {
-        // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        // HTTP Body 생성
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "c22ca4a980d7fc2f620f5b8a0a37e820");
         body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
         body.add("code", code);
 
-        // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
                 new HttpEntity<>(body, headers);
         RestTemplate rt = new RestTemplate();
@@ -90,7 +82,6 @@ public class KakaoUserService {
                 String.class
         );
 
-        // HTTP 응답 (JSON) -> 액세스 토큰 파싱
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
@@ -98,12 +89,12 @@ public class KakaoUserService {
     }
 
     private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
-        // HTTP Header 생성
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        // HTTP 요청 보내기
+
         HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
         RestTemplate rt = new RestTemplate();
 

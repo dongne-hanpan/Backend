@@ -31,7 +31,7 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
     @Override
     public Map<String, SseEmitter> findAllEmitterStartWithById(String Id) {
-        return emitters.entrySet().stream() //여러개의 Emitter가 존재할 수 있기떄문에 stream 사용
+        return emitters.entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(Id))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

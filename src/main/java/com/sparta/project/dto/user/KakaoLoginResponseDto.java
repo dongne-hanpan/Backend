@@ -12,7 +12,6 @@ public class KakaoLoginResponseDto {
     private String grantType;
     private String accessToken;
 
-    //로그인한 유저의 정보
     private String username;
     private String nickname;
     private String profileImage;
