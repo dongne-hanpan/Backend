@@ -124,11 +124,14 @@
 
 - 채팅방에 보낸 메세지는 Message Table에 저장되어 채팅방을 나갔다 들어오거나 새로들어온 유저가 이전의 채팅을 볼 수 있도록 채팅이 유지되도록 함
 
+### 8. AccessToken 정책
+
+- 토큰의 Expired-Time은 30분이며 wtFilter에서 유효성 검사를 실시하여 모든 authenticated 요청을 보낼 때마다 ValidationCheck 실시 
 
 ## API 리스트
 
 API명세서는 Swagger를 통해 작성했습니다.
-http://3.38.191.6/swagger-ui.html
+http://3.36.131.248/swagger-ui.html#/
 
 ## 트러블 슈팅
 
