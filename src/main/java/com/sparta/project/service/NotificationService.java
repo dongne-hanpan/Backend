@@ -1,7 +1,6 @@
 package com.sparta.project.service;
 
-import com.sparta.project.dto.message.Notification;
-import com.sparta.project.dto.user.InviteResponseDto;
+import com.sparta.project.dto.message.NotificationDto;
 import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Match;
 import com.sparta.project.entity.User;
@@ -52,7 +51,7 @@ public class NotificationService {
 
     public void send(String receiver, String type, User user, Match match) {
 
-        Notification notification = createNotification(receiver, type, user, match);
+        NotificationDto notificationDto = createNotification(receiver, type, user, match);
 
         Long receiverId = userRepository.findByNickname(receiver).getId();
 
@@ -60,8 +59,8 @@ public class NotificationService {
             SseEmitter sseEmitter = sseEmitters.get(receiverId);
 
             try {
-                assert notification != null;
-                sseEmitter.send(SseEmitter.event().name("connect").data(notification));
+                assert notificationDto != null;
+                sseEmitter.send(SseEmitter.event().name("connect").data(notificationDto));
             } catch (Exception e) {
                 sseEmitters.remove(receiverId);
             }
@@ -75,7 +74,7 @@ public class NotificationService {
 
             List<Match> list = matchRepository.findAllByWriter(receiver.getNickname());
 
-            List<Notification> userList = new ArrayList<>();
+            List<NotificationDto> userList = new ArrayList<>();
 
             if (list.size() != 0) {
                 for (Match match : list) {
@@ -84,7 +83,7 @@ public class NotificationService {
 
                         List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
-                        userList.add(Notification.builder()
+                        userList.add(NotificationDto.builder()
                                 .alarmType("apply")
                                 .receiver(receiver.getNickname())
                                 .match_id(match.getId())
@@ -110,12 +109,12 @@ public class NotificationService {
     }
 
 
-    private Notification createNotification(String receiver, String type, User user, Match match) {
+    private NotificationDto createNotification(String receiver, String type, User user, Match match) {
 
         if (type.equals("apply")) {
             List<Bowling> bowling = bowlingRepository.findAllByUser(user);
 
-            return Notification.builder()
+            return NotificationDto.builder()
                     .receiver(receiver)
                     .alarmType(type)
                     .isRead(false)
@@ -129,7 +128,7 @@ public class NotificationService {
                     .build();
 
         } else if (type.equals("permit")) {
-            return Notification.builder()
+            return NotificationDto.builder()
                     .receiver(receiver)
                     .alarmType(type)
                     .isRead(false)
@@ -140,7 +139,7 @@ public class NotificationService {
                     .build();
 
         } else if (type.equals("deny")) {
-            return Notification.builder()
+            return NotificationDto.builder()
                     .receiver(receiver)
                     .alarmType(type)
                     .isRead(false)

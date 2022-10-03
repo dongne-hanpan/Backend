@@ -44,19 +44,16 @@ public class MatchController {
         matchService.deleteMatch(match_id, token);
     }
 
-    //입장신청
     @GetMapping(value = "/enter/{match_id}", consumes = MediaType.ALL_VALUE)
     private InviteResponseDto enterMatch(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.enterRequest(match_id, token);
     }
 
-    //입장 수락 or 거절
     @PostMapping(value = "/permit", consumes = MediaType.ALL_VALUE)
     private void permitUser(@RequestBody InviteRequestDto inviteRequestDto, @RequestHeader(value = "Authorization") String token) {
         matchService.permitUser(inviteRequestDto, token);
     }
 
-    //신청 유저 목록 매치별로 보여주기
     @GetMapping("/request")
     private void requestUserList(@RequestHeader(value = "Authorization") String token) {
         matchService.showRequestUserList(token);
@@ -66,11 +63,6 @@ public class MatchController {
     private String setMatchStatusReserved(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {
         return matchService.setMatchStatusReserved(match_id, token);
     }
-
-//    @GetMapping("/match-status-done/{match_id}")
-//    private void setMatchStatusDone(@PathVariable Long match_id) {
-//        matchService.setMatchStatusDone(match_id);
-//    }
 
     @GetMapping("/chatroom/{match_id}")
     private MatchResponseDto showChatRoomData(@PathVariable Long match_id, @RequestHeader(value = "Authorization") String token) {

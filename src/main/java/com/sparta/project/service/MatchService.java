@@ -43,7 +43,6 @@ public class MatchService {
         Match match = new Match(matchRequestDto);
         matchRepository.save(match);
 
-        //작성자 본인을 match에 포함되도록 저장
         userListInMatchRepository.save(UserListInMatch.builder()
                 .user(user)
                 .match(match)
@@ -52,7 +51,6 @@ public class MatchService {
         return getMatchList(matchRequestDto.getRegion(), matchRequestDto.getSports());
     }
 
-    //게시글 수정
     @Transactional
     public void updateMatch(Long match_id, MatchRequestDto matchRequestDto, String token) {
 
@@ -65,7 +63,6 @@ public class MatchService {
         }
     }
 
-    //match 입장 신청
     public InviteResponseDto enterRequest(Long match_id, String token) {
 
         User user = authService.getUserByToken(token);
@@ -103,8 +100,6 @@ public class MatchService {
 
         return inviteResponseDto;
     }
-
-    //입장 수락 or 거절
 
     @Transactional
     public void permitUser(InviteRequestDto inviteRequestDto, String token) {
