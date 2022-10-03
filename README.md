@@ -129,10 +129,14 @@
 - 토큰의 Expired-Time은 30분이며 wtFilter에서 유효성 검사를 실시하여 모든 authenticated 요청을 보낼 때마다 ValidationCheck 실시.
 - 토큰 만료시 401 statusCode 반환 됨. 이 때 front에서 만료된 토큰과 함께 reissue API 요청 -> 새로운 토큰 발급
 
+---
+
 ## API 리스트
 
 API명세서는 Swagger를 통해 확인 하실 수 있습니다.
 http://3.36.131.248/swagger-ui.html#/
+
+---
 
 ## 트러블 슈팅
 
