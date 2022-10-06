@@ -33,7 +33,7 @@ public class BowlingService {
             throw new IllegalArgumentException("모집이 종료되지 않았습니다.");
         }
 
-        if(bowlingRepository.existsByUserAndMatch(user, match)) {
+        if(bowlingRepository.existsByUserAndMatchId(user, match.getId())) {
             throw new IllegalArgumentException("결과가 이미 등록되었습니다.");
         }
 
@@ -41,7 +41,7 @@ public class BowlingService {
             bowlingRepository.save(Bowling.builder()
                     .myScore(bowlingDto.getMyScore())
                     .user(user)
-                    .match(match)
+                    .matchId(match.getId())
                     .build());
 
             messageRepository.save(Message.builder()
@@ -51,7 +51,7 @@ public class BowlingService {
                     .type("result")
                     .build());
 
-            long resultCnt = bowlingRepository.countByMatch(match);
+            long resultCnt = bowlingRepository.countByMatchId(match.getId());
 
             if(resultCnt == userListInMatchRepository.countByMatch(match)) {
                 matchService.setMatchStatusDone(match.getId());

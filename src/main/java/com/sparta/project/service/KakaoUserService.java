@@ -68,7 +68,7 @@ public class KakaoUserService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "c22ca4a980d7fc2f620f5b8a0a37e820");
-        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+        body.add("redirect_uri", "http://dongne-hanpan.com/user/kakao/callback");
         body.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
@@ -123,6 +123,18 @@ public class KakaoUserService {
         User kakaoUser = userRepository.findByUsername(kakaoId)
                 .orElse(null);
         if (kakaoUser == null) {
+
+            if(userRepository.existsByNickname(kakaoUserInfo.getNickname())) {
+                String kakaoNickname = kakaoUserInfo.getNickname() + "A";
+
+                return userRepository.save(User.builder()
+                        .username(kakaoId)
+                        .nickname(kakaoNickname)
+                        .password(passwordEncoder.encode(kakaoUserInfo.getId() + "sparta"))
+                        .authority(Authority.ROLE_USER)
+                        .thumbnailImage(kakaoUserInfo.getThumbnailImage())
+                        .build());
+            }
 
             return userRepository.save(User.builder()
                     .username(kakaoId)

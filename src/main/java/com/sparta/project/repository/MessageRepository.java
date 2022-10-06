@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MessageRepository extends JpaRepository <Message, Long> {
 
-    List<Message> findAllByMatchOrderByCreatedAt(Match match);
+    List<Message> findTop100ByMatchOrderByCreatedAt(Match match);
 
     void deleteByMatch(Match match);
 

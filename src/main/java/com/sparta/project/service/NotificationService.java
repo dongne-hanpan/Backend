@@ -1,8 +1,10 @@
 package com.sparta.project.service;
 
 import com.sparta.project.dto.message.NotificationDto;
+import com.sparta.project.dto.user.InviteResponseDto;
 import com.sparta.project.entity.Bowling;
 import com.sparta.project.entity.Match;
+import com.sparta.project.entity.RequestUserList;
 import com.sparta.project.entity.User;
 import com.sparta.project.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 
 import static com.sparta.project.controller.NotificationController.sseEmitters;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

@@ -30,7 +30,7 @@ public class CalculateService {
             mannerPointAverage = sum / evaluationRepository.findAllByNickname(user.getNickname()).size();
         }
 
-        return mannerPointAverage;
+        return Math.round(mannerPointAverage*10)/10.0;
     }
 
     public Long calculateAverageScore(User user) {

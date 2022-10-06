@@ -10,8 +10,8 @@ import java.util.List;
 public interface BowlingRepository extends JpaRepository<Bowling, Long> {
 
     List<Bowling> findAllByUser(User user);
-    boolean existsByUserAndMatch(User user, Match match);
-    long countByMatch(Match match);
+    boolean existsByUserAndMatchId(User user, Long matchId);
+    long countByMatchId(Long matchId);
 
 }
 

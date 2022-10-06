@@ -157,20 +157,22 @@ public class MatchService {
 
         if (writer.equals(user.getNickname())) {
             messageRepository.deleteByMatch(match); // 자식 객체를 먼저 삭제하기 위해 추가
-            matchRepository.deleteById(match_id);
+            matchRepository.delete(match);
         } else {
             UserListInMatch userListInMatch = userListInMatchRepository.findByMatchAndUser(match, user);
-            if (!bowlingRepository.existsByUserAndMatch(user, match) && !match.getMatchStatus().equals("recruit")) {
+            if (!bowlingRepository.existsByUserAndMatchId(user, match.getId()) && !match.getMatchStatus().equals("recruit")) {
                 throw new IllegalArgumentException("결과 입력이 되지 않았습니다.");
             }
             userListInMatchRepository.delete(userListInMatch);
+
+            messageRepository.save(Message.builder()
+                    .message("님이 퇴장했습니다.")
+                    .match(match)
+                    .user(user)
+                    .type("leave")
+                    .build());
+
         }
-        messageRepository.save(Message.builder()
-                .message("님이 퇴장했습니다.")
-                .match(match)
-                .user(user)
-                .type("leave")
-                .build());
     }
 
     public List<MatchResponseDto> getMatchList(Long region, String sports) {
