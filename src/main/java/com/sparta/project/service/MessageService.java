@@ -58,7 +58,7 @@ public class MessageService {
             throw new IllegalArgumentException("초대 되지않은 매치입니다.");
         }
 
-        List<Message> messages = messageRepository.findAllByMatchOrderByCreatedAt(match);
+        List<Message> messages = messageRepository.findTop100ByMatchOrderByCreatedAt(match);
         List<ChatMessageDto> messageList = new ArrayList<>();
 
         for (Message message : messages) {

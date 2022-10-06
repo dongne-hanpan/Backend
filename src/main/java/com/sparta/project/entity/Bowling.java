@@ -25,7 +25,6 @@ public class Bowling {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "match_id")
-    private Match match;
+    @Column
+    private Long matchId;
 }

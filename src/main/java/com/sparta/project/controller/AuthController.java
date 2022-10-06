@@ -42,8 +42,8 @@ public class AuthController {
     }
 
     @GetMapping("/reissue")
-    public ResponseEntity<LoginResponseDto> reissue(@RequestHeader(value = "Authorization") String token) {
-        return ResponseEntity.ok(authService.reissue(token));
+    public LoginResponseDto reissue(@RequestHeader(value = "Authorization") String token) {
+        return authService.reissue(token);
     }
     @GetMapping("/refresh")
     public LoginResponseDto refreshUserInfo(@RequestHeader(value = "Authorization") String token) {
