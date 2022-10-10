@@ -24,7 +24,7 @@
 
 ## DB 설계
 
-![image](https://user-images.githubusercontent.com/86644517/193514412-a98dc34b-980c-4c14-9b62-f7d2c3fa0585.png)
+![image](https://user-images.githubusercontent.com/86644517/194803007-d3f604ed-e827-4c91-adc2-d216eb140f0f.png)
 
 ![image](https://user-images.githubusercontent.com/86644517/189131470-b0e151b9-8e84-4c59-82ae-3d70e44dfecf.png)
 
