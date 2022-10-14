@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Getter
-@Setter
+//@Setter
 @Table(name = "matches")
 @Entity
 @NoArgsConstructor

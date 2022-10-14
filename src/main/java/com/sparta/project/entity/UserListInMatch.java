@@ -9,7 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@Setter
+//@Setter
 @NoArgsConstructor
 public class UserListInMatch {
 

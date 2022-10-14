@@ -8,7 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Setter
+//@Setter
 @Getter
 @NoArgsConstructor
 public class RequestUserList {
